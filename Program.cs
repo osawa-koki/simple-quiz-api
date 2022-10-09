@@ -1,5 +1,14 @@
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
+using DBMod;
+using dotenv.net;
+
+DotEnv.Load();
+var envVars = DotEnv.Read();
+
+
+DBClient.Init(envVars["CONNECTION_STRING"]);
+
 
 const string CORS_RULE_NAME = "simple-quiz";
 
@@ -7,6 +16,8 @@ const string CORS_RULE_NAME = "simple-quiz";
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+
 
 // クッキー
 // builder.Services.AddDistributedMemoryCache();
@@ -76,12 +87,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/auth/sessionid", () => {
-    return new {
-        successed = true,
-        error = "",
-        sessionid = Guid.NewGuid().ToString(),
-    };
-});
+app.MapGet("/auth/sessionid", Auth.GenerateToken);
 
 app.Run();
