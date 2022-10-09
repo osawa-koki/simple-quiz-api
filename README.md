@@ -106,6 +106,16 @@ sudo certbot renew
 
 
 
+# C#ライブラリ群のインストール
+
+```bash
+dotnet add package System.Data.SqlClient
+
+
+```
+
+
+
 
 
 # API仕様書
