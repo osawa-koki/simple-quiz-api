@@ -61,6 +61,29 @@ systemctl status mssql-server --no-pager
 ```
 
 
+# SSL/TLS証明書
+
+無料で使用できる「Let's Encrypt」を使用します。
+
+```bash
+sudo apt install certbot
+sudo certbot certonly --standalone -d api.simple-quiz.org
+```
+
+更新は以下の手順で♪
+
+```bash
+# 80番ポートを解放
+lsof -i -P
+kill -9 プロセス
+
+sudo certbot renew
+```
+
+
+
+
+
 # API仕様書
 
 - [Postman](https://simple-quiz-api.postman.co/workspace/)
