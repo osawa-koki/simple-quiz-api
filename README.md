@@ -109,9 +109,8 @@ sudo certbot renew
 # C#ライブラリ群のインストール
 
 ```bash
-dotnet add package System.Data.SqlClient
-
-
+dotnet add package System.Data.SqlClient --version 4.8.3
+dotnet add package dotenv.net --version 3.1.1
 ```
 
 
