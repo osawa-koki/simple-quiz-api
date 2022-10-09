@@ -37,44 +37,64 @@ internal static class Auth
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult IsLogin(HttpContext context)
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
-		if (!auth_filled || session_id == "")
+		try
 		{
-			return Results.BadRequest(new { Message = "認証トークンが不在です。"});
-		}
+			Microsoft.Extensions.Primitives.StringValues session_id;
+			bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+			if (!auth_filled || session_id == "")
+			{
+				return Results.BadRequest(new { message = "認証トークンが不在です。"});
+			}
 
-		DBClient client = new();
-		client.Add("SELECT user_id");
-		client.Add("FROM sessions");
-		client.Add("WHERE session_id = @session_id;");
-		client.AddParam(session_id);
-		client.SetDataType("@session_id", SqlDbType.VarChar);
-		
-		var result = client.Select();
+			DBClient client = new();
+			client.Add("SELECT user_id");
+			client.Add("FROM sessions");
+			client.Add("WHERE session_id = @session_id;");
+			client.AddParam(session_id);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
+			
+			var result = client.Select();
 
-		if (result == null)
-		{
-			return Results.BadRequest(new { Message = "指定した認証トークンに不備があります。"});
-		}
+			if (result == null)
+			{
+				return Results.BadRequest(new { message = "指定した認証トークンに不備があります。"});
+			}
 
-		if (result["user_id"] != DBNull.Value)
-		{
-			return Results.Ok(new {IsLogin = true});
+			if (result["user_id"] != DBNull.Value)
+			{
+				return Results.Ok(new {IsLogin = true});
+			}
+			else
+			{
+				return Results.Ok(new {IsLogin = false});
+			}
 		}
-		else
+		catch
 		{
-			return Results.Ok(new {IsLogin = false});
+			return Results.Problem();
 		}
 	}
 
 	[ProducesResponseType(StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
-	internal static dynamic SignUp(string mail)
+	internal static IResult SignUp(string mail, string password, HttpContext context)
 	{
-		return new {
-
-		};
+		try
+		{
+			DBClient client = new();
+			client.Add("SELECT user_id");
+			client.Add("FROM users");
+			client.Add("WHERE user_id = @user_id");
+			client.AddParam(mail);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
+			var result = client.Select();
+			if (result != null) return Results.BadRequest(new { message = "既に登録済みのメールアドレスです。"});
+			
+		}
+		catch
+		{
+			return Results.Problem();
+		}
 	}
 }
 
