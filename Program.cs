@@ -6,41 +6,17 @@ using dotenv.net;
 DotEnv.Load();
 var envVars = DotEnv.Read();
 
-
 DBClient.Init(envVars["CONNECTION_STRING"]);
-
 
 const string CORS_RULE_NAME = "simple-quiz";
 
-// Configure the cert and the key
+var builder = WebApplication.CreateBuilder(
+    new WebApplicationOptions{
+        Args = args,
+        WebRootPath = "wwwroot",
+    }
+);
 
-
-var builder = WebApplication.CreateBuilder(args);
-
-
-
-// クッキー
-// builder.Services.AddDistributedMemoryCache();
-
-// builder.Services.AddSession(options =>
-// {
-//     options.IdleTimeout = TimeSpan.FromSeconds(10);
-//     options.Cookie.HttpOnly = true;
-//     options.Cookie.IsEssential = true;
-//     options.Cookie.Name = ".AdventureWorks.Session";
-// });
-
-// // 証明書
-// builder.WebHost.ConfigureKestrel(options =>
-// {
-//     options.ConfigureHttpsDefaults(httpsOptions =>
-//     {
-//         var certPath = Path.Combine(builder.Environment.ContentRootPath, "/etc/letsencrypt/live/api.simple-quiz.org/cert.pem");
-//         var keyPath = Path.Combine(builder.Environment.ContentRootPath, "/etc/letsencrypt/live/api.simple-quiz.org/privkey.pem");
-
-//         httpsOptions.ServerCertificate = X509Certificate2.CreateFromPemFile(certPath, keyPath);
-//     });
-// });
 
 // CORS許可
 builder.Services.AddCors(options =>
@@ -48,7 +24,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: CORS_RULE_NAME,
         builder =>
         {
-            builder.WithOrigins("*");
+            builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();
         }
     );
 });
@@ -70,6 +46,8 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+app.UseStaticFiles("/docs");
+
 // CORS許可
 app.UseCors(CORS_RULE_NAME);
 
@@ -82,11 +60,16 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 
-// Cookieの使用
-// app.UseSession();
-
 app.MapControllers();
 
-app.MapGet("/auth/sessionid", Auth.GenerateToken);
+
+// ***** ***** ***** ***** *****
+// *****  ルーティング設定  *****
+// ***** ***** ***** ***** *****
+
+app.MapGet("/auth/session_id", Auth.GenerateToken);
+app.MapPost("/auth/is_login", Auth.IsLogin);
+
+
 
 app.Run();
