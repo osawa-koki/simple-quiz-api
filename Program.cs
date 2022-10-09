@@ -1,4 +1,7 @@
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json;
+
+const CORS_RULE_NAME = "simple-quiz";
 
 // Configure the cert and the key
 
@@ -31,10 +34,10 @@ var builder = WebApplication.CreateBuilder(args);
 // CORS許可
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: "simple-quiz",
+    options.AddPolicy(name: CORS_RULE_NAME,
         builder =>
         {
-            builder.WithOrigins("https://simple-quiz.org", "https://www.simple-quiz.org");
+            builder.WithOrigins("*");
         }
     );
 });
@@ -57,7 +60,7 @@ builder.Services.AddSession(options =>
 var app = builder.Build();
 
 // CORS許可
-app.UseCors();
+app.UseCors(CORS_RULE_NAME);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -73,8 +76,12 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/test/{id}", async (int id) => {
-    return "a";
+app.MapGet("/auth/sessionid", () => {
+    return new {
+        successed = true,
+        error = "",
+        sessionid = Guid.NewGuid().ToString(),
+    };
 });
 
 app.Run();
