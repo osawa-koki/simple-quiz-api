@@ -62,6 +62,7 @@ app.MapControllers();
 
 app.MapGet("/auth/session_id", Auth.GenerateToken);
 app.MapPost("/auth/is_login", Auth.IsLogin);
+app.MapPost("/auth/signup", Auth.SignUp);
 
 
 
