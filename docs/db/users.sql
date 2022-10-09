@@ -1,6 +1,6 @@
 -- ユーザ情報
 
-CREATE TABLE user(
+CREATE TABLE users(
 	user_id VARCHAR(254) PRIMARY KEY,
 	pw VARCHAR(512) NOT NULL,
 	user_name NVARCHAR(50) NOT NULL,

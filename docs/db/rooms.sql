@@ -1,6 +1,6 @@
 -- ルーム
 
-CREATE TABLE room(
+CREATE TABLE rooms(
 	room_id VARCHAR(32) PRIMARY KEY,
 	explanation VARCHAR(100) NULL,
 	pw VARCHAR(16) NULL,
