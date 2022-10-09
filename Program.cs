@@ -1,7 +1,7 @@
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 
-const CORS_RULE_NAME = "simple-quiz";
+const string CORS_RULE_NAME = "simple-quiz";
 
 // Configure the cert and the key
 
