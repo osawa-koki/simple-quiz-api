@@ -1,0 +1,12 @@
+
+
+CREATE TABLE quiz_template(
+	quiztemplate_id VARCHAR(32) PRIMARY KEY,
+	owning_user VARCHAR(254) NULL,
+	owning_session VARCHAR(32) NOT NULL,
+	public BIT NOT NULL,
+	content VARCHAR(300) NOT NULL,
+	rgdt DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
