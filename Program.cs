@@ -10,12 +10,7 @@ DBClient.Init(envVars["CONNECTION_STRING"]);
 
 const string CORS_RULE_NAME = "simple-quiz";
 
-var builder = WebApplication.CreateBuilder(
-    new WebApplicationOptions{
-        Args = args,
-        WebRootPath = "wwwroot",
-    }
-);
+var builder = WebApplication.CreateBuilder(args);
 
 
 // CORS許可
@@ -45,8 +40,6 @@ builder.Services.AddSession(options =>
 });
 
 var app = builder.Build();
-
-app.UseStaticFiles("/docs");
 
 // CORS許可
 app.UseCors(CORS_RULE_NAME);
