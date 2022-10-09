@@ -35,6 +35,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Cookieの設定
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 var app = builder.Build();
 
 // CORS許可
@@ -47,10 +55,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
+// Cookieの使用
+app.UseSession();
+
 app.MapControllers();
+
+app.MapGet("/test/{id}", async (int id) => {
+    return "a";
+});
 
 app.Run();
