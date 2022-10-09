@@ -5,17 +5,28 @@ using System.Security.Cryptography.X509Certificates;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 証明書
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ConfigureHttpsDefaults(httpsOptions =>
-    {
-        var certPath = Path.Combine(builder.Environment.ContentRootPath, "/etc/letsencrypt/live/api.simple-quiz.org/cert.pem");
-        var keyPath = Path.Combine(builder.Environment.ContentRootPath, "/etc/letsencrypt/live/api.simple-quiz.org/privkey.pem");
+// クッキー
+// builder.Services.AddDistributedMemoryCache();
 
-        httpsOptions.ServerCertificate = X509Certificate2.CreateFromPemFile(certPath, keyPath);
-    });
-});
+// builder.Services.AddSession(options =>
+// {
+//     options.IdleTimeout = TimeSpan.FromSeconds(10);
+//     options.Cookie.HttpOnly = true;
+//     options.Cookie.IsEssential = true;
+//     options.Cookie.Name = ".AdventureWorks.Session";
+// });
+
+// // 証明書
+// builder.WebHost.ConfigureKestrel(options =>
+// {
+//     options.ConfigureHttpsDefaults(httpsOptions =>
+//     {
+//         var certPath = Path.Combine(builder.Environment.ContentRootPath, "/etc/letsencrypt/live/api.simple-quiz.org/cert.pem");
+//         var keyPath = Path.Combine(builder.Environment.ContentRootPath, "/etc/letsencrypt/live/api.simple-quiz.org/privkey.pem");
+
+//         httpsOptions.ServerCertificate = X509Certificate2.CreateFromPemFile(certPath, keyPath);
+//     });
+// });
 
 // CORS許可
 builder.Services.AddCors(options =>
@@ -58,7 +69,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 // Cookieの使用
-app.UseSession();
+// app.UseSession();
 
 app.MapControllers();
 
