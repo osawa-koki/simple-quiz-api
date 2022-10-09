@@ -45,6 +45,17 @@ sudo apt-get install -y mssql-server
 ```
 
 
+
+```bash
+sudo /opt/mssql/bin/mssql-conf setup
+
+# -> 3 (Express)
+# -> simplequizapi_pw1234
+
+systemctl status mssql-server --no-pager
+```
+
+
 # API仕様書
 
 - [Postman](https://simple-quiz-api.postman.co/workspace/)
