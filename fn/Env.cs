@@ -2,10 +2,11 @@ using dotenv.net;
 
 internal static class Env
 {
-	internal static string? CONNECTION_STRING;
-	internal static string? SMTPSERVER;
-	internal static string? SMTPSERVER_USER;
-	internal static string? SMTPSERVER_PASSWORD;
+	internal static string CONNECTION_STRING = "";
+	internal static string SMTPSERVER = "";
+	internal static int SMTP_PORT = 587;
+	internal static string SMTPSERVER_USER = "";
+	internal static string SMTPSERVER_PASSWORD = "";
 
 
 	internal static void Init()
@@ -28,21 +29,29 @@ internal static class Env
 		}
 		SMTPSERVER = envVars[SMTPSERVER_WORD];
 
-
-		string SMTPSERVER_USER_WORD = "SMTPSERVER_USER";
-		if (!envVars.ContainsKey(SMTPSERVER_USER_WORD))
+		
+		string SMTP_PORT_WORD = "SMTP_PORT";
+		if (!envVars.ContainsKey(SMTPSERVER_WORD))
 		{
-			Error($"{SMTPSERVER_USER_WORD}が未設定です。");
+			Error($"{SMTP_PORT_WORD}が未設定です。");
 		}
-		SMTPSERVER_USER = envVars[SMTPSERVER_USER_WORD];
+		SMTP_PORT = int.Parse(envVars[SMTP_PORT_WORD]);
 
 
-		string SMTPSERVER_PASSWORD_WORD = "SMTPSERVER_PASSWORD";
-		if (!envVars.ContainsKey(SMTPSERVER_PASSWORD_WORD))
+		string SMTP_USER_WORD = "SMTP_USER";
+		if (!envVars.ContainsKey(SMTP_USER_WORD))
 		{
-			Error($"{SMTPSERVER_PASSWORD_WORD}が未設定です。");
+			Error($"{SMTP_USER_WORD}が未設定です。");
 		}
-		SMTPSERVER_PASSWORD = envVars[SMTPSERVER_PASSWORD_WORD];
+		SMTPSERVER_USER = envVars[SMTP_USER_WORD];
+
+
+		string SMTP_PASSWORD_WORD = "SMTP_PASSWORD";
+		if (!envVars.ContainsKey(SMTP_PASSWORD_WORD))
+		{
+			Error($"{SMTP_PASSWORD_WORD}が未設定です。");
+		}
+		SMTPSERVER_PASSWORD = envVars[SMTP_PASSWORD_WORD];
 
 	}
 
