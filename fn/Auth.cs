@@ -3,6 +3,16 @@ using System.Data;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Web;
+using MailMod;
+using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http.Json;
+
+
+public struct SignUpStruct
+{
+    public string mail;
+	public string password;
+};
 
 
 internal static class Auth
@@ -77,10 +87,21 @@ internal static class Auth
 
 	[ProducesResponseType(StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
-	internal static IResult SignUp(string mail, string password, HttpContext context)
+	internal static IResult SignUp(SignUpStruct signUpStruct)
 	{
+		string mail = signUpStruct.mail;
+		string password = signUpStruct.password;
 		try
 		{
+			if (!Regex.IsMatch(mail, @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"))
+			{
+				return Results.BadRequest(new { message = "メールアドレスの形式が不正です。"});
+			}
+			if (254 < mail.Length)
+			{
+				return Results.BadRequest(new { message = "メールアドレスの形式が不正です。"});
+			}
+
 			DBClient client = new();
 			client.Add("SELECT user_id");
 			client.Add("FROM users");
@@ -89,11 +110,25 @@ internal static class Auth
 			client.SetDataType("@user_id", SqlDbType.VarChar);
 			var result = client.Select();
 			if (result != null) return Results.BadRequest(new { message = "既に登録済みのメールアドレスです。"});
-			
+			MailSetting mailSetting = new()
+			{
+				MailTo = mail,
+				MailFrom = Env.SMTPSERVER_USER ?? "",
+				Subject = "【simple-quiz】仮会員登録",
+				Body = "テスト",
+			};
+			if (MailClient.Send(mailSetting))
+			{
+				return Results.Ok();
+			}
+			else
+			{
+				return Results.Problem($"mail: {mail}; smtpserver: {Env.SMTPSERVER}; user: {Env.SMTPSERVER_USER}; pw: {Env.SMTPSERVER_PASSWORD}");
+			}
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"%{ex}%mail: {mail}; smtpserver: {Env.SMTPSERVER}; user: {Env.SMTPSERVER_USER}; pw: {Env.SMTPSERVER_PASSWORD}");
 		}
 	}
 }
