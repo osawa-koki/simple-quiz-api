@@ -266,13 +266,19 @@ internal static class Template
 			var owning_user = result["owning_user"].ToString();
 			var owning_session = result["owning_session"].ToString();
 
-			if (user_id == owning_user || session_id == owning_session)
+			if (user_id != owning_user && session_id != owning_session)
 			{
-				return Results.Ok(new {});
+				return Results.BadRequest(new {message = "指定したクイズテンプレートを削除するための権限がありません。"});
 			}
 
-			return Results.BadRequest(new {message = "指定したクイズテンプレートを削除するための権限がありません。"});
+			client.Add("DELETE FROM quiz_templates");
+			client.Add("FROM quiz_templates");
+			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
+			client.AddParam(template_id);
+			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
+			client.Execute();
 
+			return Results.Ok(new {});
 		}
 		catch
 		{
