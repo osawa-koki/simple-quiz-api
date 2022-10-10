@@ -297,6 +297,7 @@ internal static class Auth
 			client.Add("SELECT pre_user_id");
 			client.Add("FROM pre_users");
 			client.Add("WHERE token = @token");
+			client.Add("	AND DATEADD(MINUTE, -30, GETDATE()) < updt");
 			client.AddParam(token);
 			client.SetDataType("@token", SqlDbType.VarChar);
 			var result = client.Select();
