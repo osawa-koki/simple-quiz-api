@@ -16,7 +16,10 @@ internal struct TemplateStruct
 	internal int quiztemplate_id;
 	internal bool is_public;
 	internal string content;
+	internal string? transfer_to;
 	internal List<string> keywords;
+	internal DateTime rgdt;
+	internal DateTime updt;
 }
 
 
@@ -166,7 +169,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Update(string template_id, HttpContext context)
+	internal static IResult Update(int template_id, TemplateStruct templateStruct, HttpContext context)
 	{
 		Microsoft.Extensions.Primitives.StringValues session_id;
 		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
@@ -201,12 +204,33 @@ internal static class Template
 			var owning_user = result["owning_user"].ToString();
 			var owning_session = result["owning_session"].ToString();
 
-			if (user_id == owning_user || session_id == owning_session)
+			if (user_id != owning_user && session_id != owning_session)
 			{
-				return Results.Ok(new {});
+				return Results.BadRequest(new {message = "指定したクイズテンプレートを変更するための権限がありません。"});
 			}
 
-			return Results.BadRequest(new {message = "指定したクイズテンプレートを削除するための権限がありません。"});
+
+			client.Add("UPDATE quiz_templates");
+			client.Add("SET");
+			client.Add("	owning_user = @owning_user");
+			client.Add("	is_public = @is_public");
+			client.Add("	content = @content");
+			client.Add("	updt = CURRENT_TIMESTAMP;");
+			client.Add("WHERE quiztemplate_id = @quiztemplate_id");
+			// transfer_toプロパティがメールアドレスとして有効であれば所有者を変更。
+			// 型推論が弱い、、、
+			client.AddParam(Regex.IsMatch(templateStruct.transfer_to ?? "", @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$") ? templateStruct.transfer_to ?? "_" : (user_id != null ? user_id : DBNull.Value));
+			client.AddParam(templateStruct.is_public ? 1 : 0);
+			client.AddParam(templateStruct.content);
+			client.AddParam(template_id);
+			client.SetDataType("@owning_user", SqlDbType.VarChar);
+			client.SetDataType("@is_public", SqlDbType.Bit);
+			client.SetDataType("@content", SqlDbType.VarChar);
+			client.SetDataType("@quiztemplate_id", SqlDbType.Int);
+
+			client.Execute();
+
+			return Results.Ok(new {});
 
 		}
 		catch
@@ -231,7 +255,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Delete(string template_id, HttpContext context)
+	internal static IResult Delete(int template_id, HttpContext context)
 	{
 		Microsoft.Extensions.Primitives.StringValues session_id;
 		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
