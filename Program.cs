@@ -102,6 +102,7 @@ app.MapControllers();
 
 app.MapGet("/auth/session_id", Auth.GenerateToken);
 app.MapGet("/auth/is_signin", Auth.IsLogin);
+app.MapPost("/auth/pre_signup", Auth.PreSignUp);
 app.MapPost("/auth/signup", Auth.SignUp);
 app.MapDelete("/auth/signout", Auth.SignOut);
 
