@@ -101,9 +101,9 @@ app.MapControllers();
 // ***** ***** ***** ***** *****
 
 app.MapGet("/auth/session_id", Auth.GenerateToken);
-app.MapDelete("/auth/{session_id}", Auth.RevokeToken);
 app.MapGet("/auth/is_signin", Auth.IsLogin);
 app.MapPost("/auth/signup", Auth.SignUp);
+app.MapDelete("/auth/signout", Auth.SignOut);
 
 
 

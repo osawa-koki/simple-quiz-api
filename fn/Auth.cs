@@ -62,37 +62,6 @@ internal static class Auth
 
 
     /// <summary>
-    /// セッション管理用のトークンを無効化します。
-    /// </summary>
-    /// <returns>
-	/// {}
-    /// </returns>
-	/// <response code="200">正常にトークンの無効化処理が実行されました。</response>
-	/// <response code="500">トークン無効化処理中に例外が発生しました。</response>
-    [HttpDelete]
-	[ProducesResponseType(StatusCodes.Status200OK)]
-	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static dynamic RevokeToken(string token)
-	{
-		try
-		{
-			DBClient client = new();
-			client.Add("UPDATE sessions");
-			client.Add("SET is_valid = 0");
-			client.Add("WHERE session_id = @session_id;");
-			client.AddParam(token);
-			client.SetDataType("@session_id", SqlDbType.VarChar);
-			client.Execute();
-			return Results.Ok(new {});
-		}
-		catch
-		{
-			return Results.Problem();
-		}
-	}
-
-
-    /// <summary>
     /// 指定したトークンがログイン情報を保有しているかを判定します。
     /// </summary>
     /// <returns>
@@ -234,5 +203,45 @@ internal static class Auth
 			return Results.Problem();
 		}
 	}
+
+
+    /// <summary>
+    /// セッション管理用のトークンを無効化します。
+    /// </summary>
+    /// <returns>
+	/// {}
+    /// </returns>
+	/// <response code="200">正常にトークンの無効化処理が実行されました。</response>
+	/// <response code="500">トークン無効化処理中に例外が発生しました。</response>
+    [HttpDelete]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	internal static dynamic SignOut(HttpContext context)
+	{
+		Microsoft.Extensions.Primitives.StringValues session_id;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		if (!auth_filled || session_id == "")
+		{
+			return Results.BadRequest(new { message = "認証トークンが不在です。"});
+		}
+		try
+		{
+			DBClient client = new();
+			client.Add("UPDATE sessions");
+			client.Add("SET is_valid = 0");
+			client.Add("WHERE session_id = @session_id;");
+			client.AddParam(session_id);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
+			client.Execute();
+			return Results.Ok(new {});
+		}
+		catch
+		{
+			return Results.Problem();
+		}
+	}
+
+
+
 }
 
