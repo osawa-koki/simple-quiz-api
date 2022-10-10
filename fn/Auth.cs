@@ -162,9 +162,6 @@ internal static class Auth
 	/// 	}
 	///
 	/// </remarks>
-    /// <returns>
-	/// { "a": "b"}
-	/// </returns>
 	/// <param name="signUpStruct"></param>
 	/// <response code="200">正常に仮会員登録処理が完了しました。</response>
 	/// <response code="400">不正なメールアドレスが指定されました。</response>
