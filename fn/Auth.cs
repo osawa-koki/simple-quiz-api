@@ -62,6 +62,37 @@ internal static class Auth
 
 
     /// <summary>
+    /// セッション管理用のトークンを無効化します。
+    /// </summary>
+    /// <returns>
+	/// {}
+    /// </returns>
+	/// <response code="200">正常にトークンの無効化処理が実行されました。</response>
+	/// <response code="500">トークン無効化処理中に例外が発生しました。</response>
+    [HttpDelete]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	internal static dynamic RevokeToken(string token)
+	{
+		try
+		{
+			DBClient client = new();
+			client.Add("UPDATE sessions");
+			client.Add("SET is_valid = 0");
+			client.Add("WHERE session_id = @session_id;");
+			client.AddParam(token);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
+			client.Execute();
+			return Results.Ok(new {});
+		}
+		catch
+		{
+			return Results.Problem();
+		}
+	}
+
+
+    /// <summary>
     /// 指定したトークンがログイン情報を保有しているかを判定します。
     /// </summary>
     /// <returns>
@@ -138,7 +169,7 @@ internal static class Auth
 	/// <response code="200">正常に仮会員登録処理が完了しました。</response>
 	/// <response code="400">不正なメールアドレスが指定されました。</response>
 	/// <response code="500">会員登録処理中に例外が発生しました。</response>
-	[Route("auth/is_login")]
+	[Route("auth/is_signin")]
 	[Produces("application/json")]
 	[HttpPost]
 	[ProducesResponseType(StatusCodes.Status200OK)]
