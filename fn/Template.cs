@@ -293,7 +293,7 @@ internal static class Template
 				return Results.BadRequest(new {message = "指定したクイズテンプレートを変更するための権限がありません。"});
 			}
 
-
+			// テンプレートの更新処理
 			client.Add("UPDATE quiz_templates");
 			client.Add("SET");
 			client.Add("	owning_user = @owning_user");
@@ -303,7 +303,7 @@ internal static class Template
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id");
 			// transfer_toプロパティがメールアドレスとして有効であれば所有者を変更。
 			// 型推論が弱い、、、
-			client.AddParam(Regex.IsMatch(templateStruct.transfer_to ?? "", @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$") ? templateStruct.transfer_to ?? "_" : (user_id != null ? user_id : DBNull.Value));
+			client.AddParam(Regex.IsMatch(templateStruct.transfer_to ?? "", @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$") ? templateStruct.transfer_to ?? "____" : (user_id != null ? user_id : DBNull.Value));
 			client.AddParam(templateStruct.is_public ? 1 : 0);
 			client.AddParam(templateStruct.content);
 			client.AddParam(template_id);
@@ -311,6 +311,25 @@ internal static class Template
 			client.SetDataType("@is_public", SqlDbType.Bit);
 			client.SetDataType("@content", SqlDbType.VarChar);
 			client.SetDataType("@quiztemplate_id", SqlDbType.Int);
+
+			// 既に存在するキーワード一覧を削除
+			client.Add("DELETE FROM quiz_template_keywords");
+			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
+			client.AddParam(template_id);
+			client.SetDataType("@quiztemplate_id", SqlDbType.Int);
+			client.Execute();
+
+
+			// テンプレートキーワードの登録
+			client.Add("INSERT INTO quiz_template_keywords(quiztemplate_id, keyword)");
+			client.Add("VALUES");
+			List<string> keywords = new();
+			foreach (var keyword in templateStruct.keywords)
+			{
+				keywords.Add($"({template_id}, {keyword})");
+			}
+			client.Add(string.Join(",", keywords) + ";");
+			client.Execute();
 
 			client.Execute();
 
