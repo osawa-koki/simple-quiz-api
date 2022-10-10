@@ -92,10 +92,27 @@ internal static class Template
 				return Results.Forbid();
 			}
 
+			TemplateStruct answer = new();
+			answer.quiztemplate_id = template_id;
+			answer.is_public = int.Parse(template["is_public"]?.ToString() ?? "-1") == 1;
+			answer.content = template["content"].ToString() ?? "*****";
+			answer.keywords = new();
+			answer.rgdt = DateTime.Parse(template["rgdt"].ToString() ?? "*****");
+			answer.updt = DateTime.Parse(template["updt"].ToString() ?? "*****");
 
+			client.Add("SELECT keyword");
+			client.Add("FROM quiz_template_keywords");
+			client.Add("WHERE quiztemplate_id = @quiztemplate_id");
+			client.AddParam(template_id);
+			client.SetDataType("@quiztemplate_id", SqlDbType.Int);
+			var keywords = client.SelectAll();
 
+			foreach (var keyword in keywords)
+			{
+				answer.keywords.Add(keyword["keyword"]?.ToString() ?? "*****");
+			}
 
-			return Results.Ok(template);
+			return Results.Ok(answer);
 
 		}
 		catch
