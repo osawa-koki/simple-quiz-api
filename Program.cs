@@ -118,6 +118,7 @@ app.MapPost("/auth/signin", Auth.SignIn);
 
 app.MapGet("/template/list", Template.List);
 app.MapGet("/template/search", Template.Search);
+app.MapPost("/template", Template.Create);
 app.MapPut("/template/{template_id}", Template.Update);
 app.MapDelete("/template/{template_id}", Template.Delete);
 

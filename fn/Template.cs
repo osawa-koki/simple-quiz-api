@@ -148,10 +148,94 @@ internal static class Template
 		{
 			return Results.Problem();
 		}
-
-
-
 	}
+
+
+    /// <summary>
+    /// テンプレート作成
+    /// </summary>
+    /// <returns>
+	/// {}
+    /// </returns>
+	/// <response code="200">テンプレートの作成に成功しました。</response>
+	/// <response code="400">不正なパラメタが指定されました。</response>
+	/// <response code="500">テンプレートの作成処理中に例外が発生しました。</response>
+    [HttpPost]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	internal static IResult Create(TemplateStruct templateStruct, HttpContext context)
+	{
+		Microsoft.Extensions.Primitives.StringValues session_id;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		if (!auth_filled || session_id == "")
+		{
+			return Results.BadRequest(new { message = "認証トークンが不在です。"});
+		}
+
+		if (10 < templateStruct.keywords.Count)
+		{
+			return Results.BadRequest(new { message = "登録できるキーワードは10個までです。"});
+		}
+
+		DBClient client = new();
+
+		try
+		{
+			client.Add("SELECT user_id");
+			client.Add("FROM sessions");
+			client.Add("WHERE session_id = @session_id;");
+			client.AddParam(session_id);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
+			var user_id = client.Select()?["user_id"]?.ToString();
+
+			// テンプレートの登録
+			client.Add("INSERT INTO quiz_templates(owning_user, owning_session, is_public, content)");
+			client.Add("VALUES(@owning_user, @owning_session, @is_public, @content)");
+			client.AddParam(user_id != null ? user_id : DBNull.Value);
+			client.AddParam(session_id);
+			client.AddParam(templateStruct.is_public ? 1 : 0);
+			client.AddParam(templateStruct.content);
+			client.SetDataType("@", SqlDbType.VarChar);
+			client.SetDataType("@", SqlDbType.VarChar);
+			client.SetDataType("@", SqlDbType.Bit);
+			client.SetDataType("@", SqlDbType.VarChar);
+			client.Execute();
+
+			// 登録したIDを取得
+			client.Add("SELECT TOP 1 quiztemplate_id");
+			client.Add("FROM quiz_templates");
+			client.Add("WHERE owning_session = @owning_session");
+			client.Add("ORDER BY quiztemplate_id DESC;");
+			client.AddParam(session_id);
+			client.SetDataType("@owning_session", SqlDbType.VarChar);
+			var created_id = int.Parse(client.Select()?["quiztemplate_id"]?.ToString() ?? "-1");
+
+			if (created_id == -1)
+			{
+				return Results.Problem();
+			}
+
+
+			// テンプレートキーワードの登録
+			client.Add("INSERT INTO quiz_template_keywords(quiztemplate_id, keyword)");
+			client.Add("VALUES");
+			List<string> keywords = new();
+			foreach (var keyword in templateStruct.keywords)
+			{
+				keywords.Add($"({created_id}, {keyword})");
+			}
+			client.Add(string.Join(",", keywords) + ";");
+			client.Execute();
+
+			return Results.Ok(new {});
+		}
+		catch
+		{
+			return Results.Problem();
+		}
+	}
+
 
 
 
