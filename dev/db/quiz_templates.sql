@@ -1,7 +1,7 @@
 
 
 CREATE TABLE quiz_templates(
-	quiztemplate_id INT PRIMARY KEY IDENTITY(1, 1),
+	quiztemplate_id INT PRIMARY KEY IDENTITY(0, 1),
 	owning_user VARCHAR(254) NULL,
 	owning_session VARCHAR(32) NOT NULL,
 	is_public BIT NOT NULL,
