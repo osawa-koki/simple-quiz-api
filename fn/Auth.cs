@@ -9,14 +9,34 @@ using Microsoft.AspNetCore.Http.Json;
 
 
 /// <summary>
-/// "/auth/signup"に送るJSONデータ
+/// "/auth/pre_signup"に送るJSONデータ
 /// </summary>
-public struct SignUpStruct
+public struct PreSignUpStruct
 {
 	/// <summary>
     /// 仮登録を行うメールアドレス
     /// </summary>
     public string mail;
+};
+
+
+/// <summary>
+/// "/auth/signup"に送るJSONデータ
+/// </summary>
+public struct SignUpStruct
+{
+	/// <summary>
+    /// 仮会員登録時に発行したトークン
+    /// </summary>
+    public string token;
+	/// <summary>
+    /// ユーザ名(50文字以内)
+    /// </summary>
+    public string user_name;
+	/// <summary>
+    /// パスワード(8-32)
+    /// </summary>
+    public string password;
 };
 
 
@@ -131,7 +151,7 @@ internal static class Auth
 	/// 	}
 	///
 	/// </remarks>
-	/// <param name="signUpStruct"></param>
+	/// <param name="preSignUpStruct"></param>
 	/// <response code="200">正常に仮会員登録処理が完了しました。</response>
 	/// <response code="400">不正なメールアドレスが指定されました。</response>
 	/// <response code="500">会員登録処理中に例外が発生しました。</response>
@@ -141,9 +161,9 @@ internal static class Auth
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult PreSignUp(SignUpStruct signUpStruct)
+	internal static IResult PreSignUp(PreSignUpStruct preSignUpStruct)
 	{
-		string mail = signUpStruct.mail;
+		string mail = preSignUpStruct.mail;
 		try
 		{
 			// メールアドレスのチェック
@@ -203,6 +223,90 @@ internal static class Auth
 			return Results.Problem();
 		}
 	}
+
+
+    /// <summary>
+    /// 本登録処理を実行します。
+    /// </summary>
+	/// <remarks>
+	/// Sample request:
+	///
+	/// 	POST /auth/signup
+	/// 	{
+	/// 		"token": "fba8c49f09f140d693ddf2a33491a82e",
+	/// 		"user_name": "hogehoge",
+	/// 		"password": "foofoo",
+	/// 		"comment": "hogefoo"
+	/// 	}
+	///
+	/// </remarks>
+	/// <param name="signUpStruct"></param>
+	/// <response code="200">正常に仮会員登録処理が完了しました。</response>
+	/// <response code="400">不正なメールアドレスが指定されました。</response>
+	/// <response code="500">会員登録処理中に例外が発生しました。</response>
+	[Route("auth/signup")]
+	[Produces("application/json")]
+	[HttpPost]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	internal static IResult SignUp(SignUpStruct signUpStruct)
+	{
+		string token = signUpStruct.token;
+		string user_name = signUpStruct.user_name;
+		string password = signUpStruct.password;
+		try
+		{
+			// ユーザ名のチェック
+			if (user_name.Length < 3 || 50 < user_name.Length)
+			{
+				return Results.BadRequest(new { message = "ユーザ名の長さが不正です。"});
+			}
+			// パスワードのチェック
+			if (password.Length < 8 || 32 < password.Length)
+			{
+				return Results.BadRequest(new { message = "パスワードの文字数が不正です。"});
+			}
+
+			DBClient client = new();
+
+			// トークンのチェック
+
+			client.Add("SELECT pre_user_id");
+			client.Add("FROM pre_users");
+			client.Add("WHERE token = @token");
+			client.AddParam(token);
+			client.SetDataType("@token", SqlDbType.VarChar);
+			var result = client.Select();
+			if (result == null) return Results.BadRequest(new { message = "指定したトークンは無効です。"});
+			string pre_user_id = ((string)result["pre_user_id"]).ToString();
+
+
+			// 本登録処理
+			string? hashed_password = Util.HashPassword(pre_user_id + password);
+			if (hashed_password == null) return Results.Problem();
+
+			client.Add("INSERT INTO users(user_id, pw, user_name, comment)");
+			client.Add("VALUES(@user_id, @pw, @user_name, @comment)");
+			client.AddParam(pre_user_id);
+			client.AddParam(hashed_password);
+			client.AddParam(user_name);
+			client.AddParam(password);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
+			client.SetDataType("@pw", SqlDbType.VarChar);
+			client.SetDataType("@user_name", SqlDbType.VarChar);
+			client.SetDataType("@comment", SqlDbType.VarChar);
+			client.Execute();
+			
+			return Results.Ok(new {});
+		}
+		catch
+		{
+			return Results.Problem();
+		}
+	}
+
+
 
 
     /// <summary>
