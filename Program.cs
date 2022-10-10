@@ -8,7 +8,7 @@ Env.Init();
 
 
 DBClient.Init(Env.CONNECTION_STRING);
-MailClient.Init(Env.SMTPSERVER ?? "");
+MailClient.Init(Env.SMTPSERVER, Env.SMTP_PORT, Env.SMTPSERVER_USER, Env.SMTPSERVER_PASSWORD);
 
 
 const string CORS_RULE_NAME = "simple-quiz";
