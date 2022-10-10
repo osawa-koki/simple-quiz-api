@@ -27,10 +27,16 @@ namespace MailMod
 	{
 
 		internal static string? SMTPServer;
+		internal static int? SMTP_PORT;
+		internal static string? AUTH_USER;
+		internal static string? AUTH_PASSWORD;
 
-		internal static void Init(string smtpServer)
+		internal static void Init(string smtpServer, int smtp_port, string? user, string? password)
 		{
 			SMTPServer = smtpServer;
+			SMTP_PORT = smtp_port;
+			AUTH_USER = user;
+			AUTH_PASSWORD = password;
 		}
 
 		internal static bool Send(MailSetting mailSetting)
@@ -42,6 +48,7 @@ namespace MailMod
 			}
 
 			MailMessage message = new(mailSetting.MailFrom, mailSetting.MailTo);
+
 			// foreach (var CC in mailSetting.MailCC)
 			// {
 			// 	message.CC.Add(CC);
@@ -58,14 +65,16 @@ namespace MailMod
 
 			try
 			{
-				using var client = new SmtpClient(SMTPServer);
-				client.Credentials = new NetworkCredential(Env.SMTPSERVER_USER, Env.SMTPSERVER_PASSWORD);
+				using var client = SMTP_PORT != null ? new SmtpClient(SMTPServer, SMTP_PORT ?? 587) : new SmtpClient(SMTPServer);
+				client.Credentials = new NetworkCredential(AUTH_USER, AUTH_PASSWORD);
 				client.Timeout = 10 * 1000;
+				client.DeliveryMethod = SmtpDeliveryMethod.Network;
 				client.Send(message);
 				return true;
 			}
 			catch (Exception ex)
 			{
+				Console.WriteLine(ex.Message);
 				return false;
 			}
 		}
@@ -80,7 +89,4 @@ namespace MailMod
 		}
 	}
 }
-
-
-
 
