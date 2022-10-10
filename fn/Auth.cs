@@ -40,6 +40,22 @@ public struct SignUpStruct
 };
 
 
+/// <summary>
+/// "/auth/signin"に送るJSONデータ
+/// </summary>
+public struct SignInStruct
+{
+	/// <summary>
+    /// メール
+    /// </summary>
+    public string user_id;
+	/// <summary>
+    /// パスワード(8-32)
+    /// </summary>
+    public string password;
+};
+
+
 internal static class Auth
 {
 
@@ -340,6 +356,78 @@ internal static class Auth
 			return Results.Ok(new {
 				revoke = session_id,
 			});
+		}
+		catch
+		{
+			return Results.Problem();
+		}
+	}
+
+
+    /// <summary>
+    /// サインイン処理
+    /// </summary>
+    /// <returns>
+	/// {}
+    /// </returns>
+	/// <response code="200">正常にサインイン処理が実行されました。</response>
+	/// <response code="400">認証に失敗しました。</response>
+	/// <response code="500">予期せぬ例外が発生しました。</response>
+    [HttpPost]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	internal static dynamic SignIn(SignInStruct signInStruct, HttpContext context)
+	{
+		Microsoft.Extensions.Primitives.StringValues session_id;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		if (!auth_filled || session_id == "")
+		{
+			return Results.BadRequest(new { message = "認証トークンが不在です。"});
+		}
+		try
+		{
+			string user_id = signInStruct.user_id;
+			string password = signInStruct.password;
+
+
+			// メールアドレスのチェック
+			if (!Regex.IsMatch(user_id, @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"))
+			{
+				return Results.BadRequest(new { message = "メールアドレスの形式が不正です。"});
+			}
+			if (254 < user_id.Length)
+			{
+				return Results.BadRequest(new { message = "メールアドレスは254文字以内で入力してください。"});
+			}
+
+			if (!Regex.IsMatch(password, @"^[a-zA-Z0-9-/:-@\[-\`\{-\~]+$"))
+			{
+				return Results.BadRequest(new { message = "パスワードは空白類似文字を除いた半角英数字のみで構成してください。"});
+			}
+			if (password.Length < 8 || 32 < password.Length)
+			{
+				return Results.BadRequest(new { message = "パスワードは8文字以上、32文字以内で入力してください。"});
+			}
+
+			// 認証チェック
+			var hashed_password = Util.HashPassword(user_id + password);
+			if (hashed_password == null) return Results.Problem();
+
+			DBClient client = new();
+			client.Add("SELECT user_id");
+			client.Add("FROM users");
+			client.Add("WHERE user_id = @user_id AND pw = @pw;");
+			client.AddParam(user_id);
+			client.AddParam(hashed_password);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
+			client.SetDataType("@pw", SqlDbType.VarChar);
+
+			if (client.Select() != null)
+			{
+				return Results.Ok(new {});
+			}
+			return Results.BadRequest(new { message = "認証に失敗しました。"});
 		}
 		catch
 		{
