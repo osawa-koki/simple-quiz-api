@@ -100,12 +100,25 @@ app.MapControllers();
 // *****  ルーティング設定  *****
 // ***** ***** ***** ***** *****
 
+// ==============================
+// =====       認証系       =====
+// ==============================
+
 app.MapGet("/auth/session_id", Auth.GenerateToken);
 app.MapGet("/auth/is_signin", Auth.IsLogin);
 app.MapPost("/auth/pre_signup", Auth.PreSignUp);
 app.MapPost("/auth/signup", Auth.SignUp);
 app.MapDelete("/auth/signout", Auth.SignOut);
 app.MapPost("/auth/signin", Auth.SignIn);
+
+
+// ==============================
+// =====     テンプレート     =====
+// ==============================
+
+app.MapGet("/template/list", Template.List);
+app.MapGet("/template/search", Template.Search);
+
 
 
 app.Run();
