@@ -116,6 +116,7 @@ app.MapPost("/auth/signin", Auth.SignIn);
 // =====     テンプレート     =====
 // ==============================
 
+app.MapGet("/template/{template_id}", Template.Detail);
 app.MapGet("/template/list", Template.List);
 app.MapGet("/template/search", Template.Search);
 app.MapPost("/template", Template.Create);

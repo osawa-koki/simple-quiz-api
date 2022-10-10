@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Http.Json;
 /// </summary>
 internal struct TemplateStruct
 {
-	internal int quiztemplate_id;
+	internal int? quiztemplate_id;
 	internal bool is_public;
 	internal string content;
 	internal string? transfer_to;
@@ -27,13 +27,92 @@ internal struct TemplateStruct
 internal static class Template
 {
 
+	    /// <summary>
+    /// テンプレート詳細取得
+    /// </summary>
+	/// <remarks>
+	/// 	
+	/// 	Sample request:
+	/// 		GET /template/120
+	/// 	
+	/// </remarks>
+    /// <returns>
+	/// {}
+    /// </returns>
+	/// <response code="200">正常にテンプレート詳細を取得できました。</response>
+	/// <response code="400">不正なパラメタが送信されました。</response>
+	/// <response code="403">指定したテンプレートにアクセスする権限がありません。</response>
+	/// <response code="500">テンプレート詳細取得処理中に例外が発生しました。</response>
+    [HttpGet]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status403Forbidden)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	internal static IResult Detail(int template_id, HttpContext context)
+	{
+		if (template_id < 0)
+		{
+			return Results.BadRequest(new {message = "テンプレートIDには正の整数を指定してください。"});
+		}
+
+		Microsoft.Extensions.Primitives.StringValues session_id;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		if (!auth_filled || session_id == "")
+		{
+			return Results.BadRequest(new { message = "認証トークンが不在です。"});
+		}
+
+		DBClient client = new();
+
+		try
+		{
+			client.Add("SELECT user_id");
+			client.Add("FROM sessions");
+			client.Add("WHERE session_id = @session_id;");
+			client.AddParam(session_id);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
+			var user_id = client.Select()?["user_id"]?.ToString();
+
+			// 詳細取得処理
+			client.Add("SELECT t.owning_user, t.owning_session, t.is_public, t.content, t.rgdt, t.updt, u.user_name, u.user_icon");
+			client.Add("FROM quiz_templates t");
+			client.Add("INNER JOIN users u ON t.owning_user = u.user_id");
+			client.Add("WHERE is_public = 1 OR owning_user = @user_id OR owning_session = @session_id");
+			client.Add("	AND quiztemplate_id = @quiztemplate_id;");
+			client.AddParam(template_id);
+			var template = client.Select();
+
+			if (template == null)
+			{
+				return Results.BadRequest(new {message = "指定したテンプレートIDは存在しません。"});
+			}
+
+			if (template["owning_user"].ToString() != user_id && template["owning_session"] != session_id)
+			{
+				return Results.Forbid();
+			}
+
+
+
+
+			return Results.Ok(template);
+
+		}
+		catch
+		{
+			return Results.Problem();
+		}
+	}
+
 
     /// <summary>
     /// テンプレート一覧取得
     /// </summary>
 	/// <remarks>
-	/// Sample request:
-	/// 	GET /template/list?since=10&amp;per_page=30
+	/// 	
+	/// 	Sample request:
+	/// 		GET /template/list?since=10&amp;per_page=30
+	/// 	
 	/// </remarks>
     /// <returns>
 	/// {}
@@ -98,8 +177,10 @@ internal static class Template
     /// テンプレート検索
     /// </summary>
 	/// <remarks>
+	/// 	
 	/// Sample request:
 	/// 	GET /template/search?search_by=ランキング&amp;per_page=30
+	/// 	
 	/// </remarks>
     /// <returns>
 	/// {}
@@ -164,13 +245,14 @@ internal static class Template
     /// </summary>
 	/// <remarks>
 	/// Sample request:
+	/// 	
 	/// 	POST /template
 	/// 	{
-	/// 		"quiztemplate_id": 100,
 	/// 		"is_public": true,
 	/// 		"content": "世界で${number}番目に高い山は???",
 	/// 		"keywords": ["ランキング", "山", "教養", "地理"]
 	/// 	}
+	/// 	
 	/// </remarks>
     /// <returns>
 	/// {}
@@ -261,6 +343,7 @@ internal static class Template
     /// <summary>
     /// テンプレート変更
     /// </summary>
+	/// 	
 	/// 	PUT /template
 	/// 	{
 	/// 		"quiztemplate_id": 100,
@@ -269,15 +352,18 @@ internal static class Template
 	/// 		"transfer_to": "hogehoge@exmaple.com",
 	/// 		"keywords": ["ランキング", "山", "教養", "地理"]
 	/// 	}
+	/// 	
     /// <returns>
 	/// {}
     /// </returns>
 	/// <response code="200">指定したテンプレートを正常に変更しました。</response>
 	/// <response code="400">指定したパラメタが不正です。</response>
+	/// <response code="403">指定したテンプレートにアクセスする権限がありません。</response>
 	/// <response code="500">テンプレートの変更処理中に例外が発生しました。</response>
     [HttpPut]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Update(int template_id, TemplateStruct templateStruct, HttpContext context)
 	{
@@ -316,7 +402,7 @@ internal static class Template
 
 			if (user_id != owning_user && session_id != owning_session)
 			{
-				return Results.BadRequest(new {message = "指定したクイズテンプレートを変更するための権限がありません。"});
+				return Results.Forbid();
 			}
 
 			// テンプレートの更新処理
@@ -374,17 +460,21 @@ internal static class Template
     /// </summary>
 	/// <remarks>
 	/// Sample request:
+	/// 	
 	/// 	DELETE /template/100
+	/// 	
 	/// </remarks>
     /// <returns>
 	/// {}
     /// </returns>
 	/// <response code="200">指定したテンプレートを正常に削除しました。</response>
 	/// <response code="400">指定したパラメタが不正です。</response>
+	/// <response code="403">指定したテンプレートにアクセスする権限がありません。</response>
 	/// <response code="500">テンプレートの削除処理中に例外が発生しました。</response>
     [HttpDelete]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Delete(int template_id, HttpContext context)
 	{
@@ -423,7 +513,7 @@ internal static class Template
 
 			if (user_id != owning_user && session_id != owning_session)
 			{
-				return Results.BadRequest(new {message = "指定したクイズテンプレートを削除するための権限がありません。"});
+				return Results.Forbid();
 			}
 
 			client.Add("DELETE FROM quiz_templates");
