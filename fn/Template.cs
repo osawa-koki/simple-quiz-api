@@ -18,8 +18,8 @@ internal struct TemplateStruct
 	internal string content;
 	internal string? transfer_to;
 	internal List<string> keywords;
-	internal DateTime rgdt;
-	internal DateTime updt;
+	internal DateTime? rgdt;
+	internal DateTime? updt;
 }
 
 
