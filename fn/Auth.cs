@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Http.Json;
 public struct SignUpStruct
 {
     public string mail;
-	public string password;
 };
 
 
@@ -90,26 +89,40 @@ internal static class Auth
 	internal static IResult SignUp(SignUpStruct signUpStruct)
 	{
 		string mail = signUpStruct.mail;
-		string password = signUpStruct.password;
 		try
 		{
+			// メールアドレスのチェック
 			if (!Regex.IsMatch(mail, @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"))
 			{
 				return Results.BadRequest(new { message = "メールアドレスの形式が不正です。"});
 			}
 			if (254 < mail.Length)
 			{
-				return Results.BadRequest(new { message = "メールアドレスの形式が不正です。"});
+				return Results.BadRequest(new { message = "メールアドレスは254文字以内で入力してください。"});
 			}
 
 			DBClient client = new();
+
+			// 既に登録済みかチェック
 			client.Add("SELECT user_id");
 			client.Add("FROM users");
 			client.Add("WHERE user_id = @user_id");
 			client.AddParam(mail);
 			client.SetDataType("@user_id", SqlDbType.VarChar);
-			var result = client.Select();
-			if (result != null) return Results.BadRequest(new { message = "既に登録済みのメールアドレスです。"});
+			if (client.Select() != null) return Results.BadRequest(new { message = "既に登録済みのメールアドレスです。"});
+
+
+			// 一定時間前に送信してたら
+			client.Add("SELECT pre_user");
+			client.Add("FROM pre_users");
+			client.Add("WHERE pre_user = @pre_user");
+			client.Add("	AND DATEADD(SECOND, -30, GETDATE()) < updt;");
+			if (client.Select() != null) return Results.BadRequest(new { message = "30秒以上間隔を開けてください。"});
+
+			// トークンをセット
+
+
+
 			MailSetting mailSetting = new()
 			{
 				MailTo = mail,
@@ -119,7 +132,7 @@ internal static class Auth
 			};
 			if (MailClient.Send(mailSetting))
 			{
-				return Results.Ok();
+				return Results.Ok(new {});
 			}
 			else
 			{
