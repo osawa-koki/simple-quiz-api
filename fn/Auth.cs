@@ -123,12 +123,12 @@ internal static class Auth
 			}
 			else
 			{
-				return Results.Problem($"mail: {mail}; smtpserver: {Env.SMTPSERVER}; user: {Env.SMTPSERVER_USER}; pw: {Env.SMTPSERVER_PASSWORD}");
+				return Results.Problem();
 			}
 		}
-		catch (Exception ex)
+		catch
 		{
-			return Results.Problem($"%{ex}%mail: {mail}; smtpserver: {Env.SMTPSERVER}; user: {Env.SMTPSERVER_USER}; pw: {Env.SMTPSERVER_PASSWORD}");
+			return Results.Problem();
 		}
 	}
 }
