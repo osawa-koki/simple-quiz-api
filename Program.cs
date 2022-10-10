@@ -1,12 +1,15 @@
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using DBMod;
-using dotenv.net;
+using MailMod;
+using Microsoft.AspNetCore.Http.Json;
 
-DotEnv.Load();
-var envVars = DotEnv.Read();
+Env.Init();
 
-DBClient.Init(envVars["CONNECTION_STRING"]);
+
+DBClient.Init(Env.CONNECTION_STRING);
+MailClient.Init(Env.SMTPSERVER ?? "");
+
 
 const string CORS_RULE_NAME = "simple-quiz";
 
@@ -22,6 +25,13 @@ builder.Services.AddCors(options =>
             builder.WithOrigins("*").AllowAnyHeader().AllowAnyMethod();
         }
     );
+});
+
+
+// Configure JSON options.
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.IncludeFields = true;
 });
 
 // Add services to the container.
@@ -62,6 +72,7 @@ app.MapControllers();
 
 app.MapGet("/auth/session_id", Auth.GenerateToken);
 app.MapPost("/auth/is_login", Auth.IsLogin);
+
 app.MapPost("/auth/signup", Auth.SignUp);
 
 
