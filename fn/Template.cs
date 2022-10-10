@@ -62,7 +62,7 @@ internal static class Template
 		{
 			client.Add("SELECT user_id");
 			client.Add("FROM sessions");
-			client.Add("WHERE session_id = @session_id");
+			client.Add("WHERE session_id = @session_id;");
 			client.AddParam(session_id);
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			var user_id = client.Select()?["user_id"]?.ToString();
@@ -124,7 +124,7 @@ internal static class Template
 		{
 			client.Add("SELECT user_id");
 			client.Add("FROM sessions");
-			client.Add("WHERE session_id = @session_id");
+			client.Add("WHERE session_id = @session_id;");
 			client.AddParam(session_id);
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			var user_id = client.Select()?["user_id"]?.ToString();
@@ -134,7 +134,7 @@ internal static class Template
 			client.Add("INNER JOIN quiz_templates t ON k.quiztemplate_id = t.quiztemplate_id");
 			client.Add("INNER JOIN users u ON t.owning_user = u.user_id");
 			client.Add("WHERE is_public = 1 OR owning_user = @user_id OR owning_session = @session_id");
-			client.Add("ORDER BY t.quiztemplate_id ASC");
+			client.Add("ORDER BY t.quiztemplate_id ASC;");
 			client.AddParam(user_id ?? ""); // ログインしていなければ、存在しないIDを指定する。 -> user_id未指定と同じ
 			client.AddParam(auth_filled);
 			var templates = client.SelectAll();
@@ -150,6 +150,71 @@ internal static class Template
 
 	}
 
+
+
+
+
+    /// <summary>
+    /// テンプレート削除
+    /// </summary>
+    /// <returns>
+	/// {}
+    /// </returns>
+	/// <response code="200">指定したテンプレートを正常に削除しました。</response>
+	/// <response code="400">指定したパラメタが不正です。</response>
+	/// <response code="500">テンプレートの削除処理中に例外が発生しました。</response>
+    [HttpDelete]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	internal static IResult Delete(string template_id, HttpContext context)
+	{
+		Microsoft.Extensions.Primitives.StringValues session_id;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		if (!auth_filled || session_id == "")
+		{
+			return Results.BadRequest(new { message = "認証トークンが不在です。"});
+		}
+
+		DBClient client = new();
+
+		try
+		{
+			client.Add("SELECT user_id");
+			client.Add("FROM sessions");
+			client.Add("WHERE session_id = @session_id;");
+			client.AddParam(session_id);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
+			var user_id = client.Select()?["user_id"]?.ToString();
+
+			client.Add("SELECT owning_user, owning_session");
+			client.Add("FROM quiz_templates");
+			client.Add("WHERE quiztemplate_id = @quiztemplate_id");
+			client.AddParam(template_id);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
+			var result = client.Select();
+
+			if (result == null)
+			{
+				return Results.BadRequest(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
+			}
+
+			var owning_user = result["owning_user"].ToString();
+			var owning_session = result["owning_session"].ToString();
+
+			if (user_id == owning_user || session_id == owning_session)
+			{
+				return Results.Ok(new {});
+			}
+
+			return Results.BadRequest(new {message = "指定したクイズテンプレートを削除するための権限がありません。"});
+
+		}
+		catch
+		{
+			return Results.Problem();
+		}
+	}
 
 
 

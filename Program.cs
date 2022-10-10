@@ -118,7 +118,7 @@ app.MapPost("/auth/signin", Auth.SignIn);
 
 app.MapGet("/template/list", Template.List);
 app.MapGet("/template/search", Template.Search);
-
+app.MapDelete("/template/{template_id:string}", Template.Delete);
 
 
 app.Run();
