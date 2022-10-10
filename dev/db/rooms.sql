@@ -2,6 +2,7 @@
 
 CREATE TABLE rooms(
 	room_id VARCHAR(32) PRIMARY KEY,
+	room_name VARCHAR(30) NOT NULL,
 	explanation VARCHAR(100) NULL,
 	pw VARCHAR(16) NULL,
 	is_public BIT NOT NULL,
