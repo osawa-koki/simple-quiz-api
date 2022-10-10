@@ -135,7 +135,7 @@ internal static class Auth
 	/// <response code="200">正常に仮会員登録処理が完了しました。</response>
 	/// <response code="400">不正なメールアドレスが指定されました。</response>
 	/// <response code="500">会員登録処理中に例外が発生しました。</response>
-	[Route("auth/is_signin")]
+	[Route("auth/pre_signup")]
 	[Produces("application/json")]
 	[HttpPost]
 	[ProducesResponseType(StatusCodes.Status200OK)]
@@ -233,7 +233,9 @@ internal static class Auth
 			client.AddParam(session_id);
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			client.Execute();
-			return Results.Ok(new {});
+			return Results.Ok(new {
+				revoke = session_id,
+			});
 		}
 		catch
 		{
