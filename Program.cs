@@ -61,6 +61,7 @@ builder.Services.AddSwaggerGen(options =>
             Url = new Uri($"{Env.DOMAIN}/license")
         }
     });
+    //options.SerializeAsV2 = true;
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 });
@@ -85,6 +86,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseSwaggerUI(options =>
+{
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+    options.RoutePrefix = string.Empty;
+});
+
 app.UseAuthorization();
 
 app.MapControllers();
@@ -95,8 +102,7 @@ app.MapControllers();
 // ***** ***** ***** ***** *****
 
 app.MapGet("/auth/session_id", Auth.GenerateToken);
-app.MapPost("/auth/is_login", Auth.IsLogin);
-
+app.MapGet("/auth/is_login", Auth.IsLogin);
 app.MapPost("/auth/signup", Auth.SignUp);
 
 
