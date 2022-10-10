@@ -112,6 +112,7 @@ sudo certbot renew
 dotnet add package System.Data.SqlClient --version 4.8.3
 dotnet add package dotenv.net --version 3.1.1
 dotnet add package Swashbuckle.AspNetCore --version 6.4.0
+dotnet add package Microsoft.OpenApi --version 1.4.4-preview1
 ```
 
 

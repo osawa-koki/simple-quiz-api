@@ -41,9 +41,16 @@ internal static class Auth
 
 	}
 
+
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    /// <summary>
+    /// 指定した ID に紐付く注文情報を取得します。
+    /// </summary>
+    /// <param name="orderId">取得する注文情報の ID。</param>
+    /// <returns>取得した注文情報。</returns>
+    [HttpGet("{orderId}")]
 	internal static IResult IsLogin(HttpContext context)
 	{
 		try
@@ -101,7 +108,9 @@ internal static class Auth
 				return Results.BadRequest(new { message = "メールアドレスは254文字以内で入力してください。"});
 			}
 
+
 			DBClient client = new();
+
 
 			// 既に登録済みかチェック
 			client.Add("SELECT user_id");
@@ -120,15 +129,17 @@ internal static class Auth
 			if (client.Select() != null) return Results.BadRequest(new { message = "30秒以上間隔を開けてください。"});
 
 			// トークンをセット
-
+			string token = Guid.NewGuid().ToString("N");
+			client.Add($"EXEC set_mail_token @pre_user_id = '{mail.Replace("'", "''")}, @token = '{token.Replace("'", "''")}';"); // SQLインジェクション攻撃対策
+			client.Execute();
 
 
 			MailSetting mailSetting = new()
 			{
 				MailTo = mail,
-				MailFrom = Env.SMTPSERVER_USER ?? "",
+				MailFrom = Env.SMTPSERVER_USER,
 				Subject = "【simple-quiz】仮会員登録",
-				Body = "テスト",
+				Body = $"以下のリンクから会員登録を完成させてください。\r\nリンクの有効期限は10分です。\r\n\r\n{Env.DOMAIN}/register?token={token}",
 			};
 			if (MailClient.Send(mailSetting))
 			{

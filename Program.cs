@@ -3,6 +3,9 @@ using System.Text.Json;
 using DBMod;
 using MailMod;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+
 
 Env.Init();
 
@@ -39,7 +42,28 @@ builder.Services.Configure<JsonOptions>(options =>
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Version = "v1",
+        Title = "simple-quiz API",
+        Description = "API for simple-quiz",
+        TermsOfService = new Uri($"{Env.DOMAIN}/terms"),
+        Contact = new OpenApiContact
+        {
+            Name = "Example Contact",
+            Url = new Uri($"{Env.DOMAIN}/contact")
+        },
+        License = new OpenApiLicense
+        {
+            Name = "Example License",
+            Url = new Uri($"{Env.DOMAIN}/license")
+        }
+    });
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+});
 
 // Cookieの設定
 builder.Services.AddDistributedMemoryCache();
