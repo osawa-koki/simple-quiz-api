@@ -31,6 +31,10 @@ internal static class Template
     /// <summary>
     /// テンプレート一覧取得
     /// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	GET /template/list?since=10&amp;per_page=30
+	/// </remarks>
     /// <returns>
 	/// {}
     /// </returns>
@@ -93,6 +97,10 @@ internal static class Template
     /// <summary>
     /// テンプレート検索
     /// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	GET /template/search?search_by=ランキング&amp;per_page=30
+	/// </remarks>
     /// <returns>
 	/// {}
     /// </returns>
@@ -154,6 +162,16 @@ internal static class Template
     /// <summary>
     /// テンプレート作成
     /// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	POST /template
+	/// 	{
+	/// 		"quiztemplate_id": 100,
+	/// 		"is_public": true,
+	/// 		"content": "世界で${number}番目に高い山は???",
+	/// 		"keywords": ["ランキング", "山", "教養", "地理"]
+	/// 	}
+	/// </remarks>
     /// <returns>
 	/// {}
     /// </returns>
@@ -243,6 +261,14 @@ internal static class Template
     /// <summary>
     /// テンプレート変更
     /// </summary>
+	/// 	PUT /template
+	/// 	{
+	/// 		"quiztemplate_id": 100,
+	/// 		"is_public": true,
+	/// 		"content": "世界で${number}番目に高い山は???",
+	/// 		"transfer_to": "hogehoge@exmaple.com",
+	/// 		"keywords": ["ランキング", "山", "教養", "地理"]
+	/// 	}
     /// <returns>
 	/// {}
     /// </returns>
@@ -346,6 +372,10 @@ internal static class Template
     /// <summary>
     /// テンプレート削除
     /// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	DELETE /template/100
+	/// </remarks>
     /// <returns>
 	/// {}
     /// </returns>
