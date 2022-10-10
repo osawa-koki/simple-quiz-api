@@ -8,14 +8,33 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.Json;
 
 
+/// <summary>
+/// "/auth/signup"に送るJSONデータ
+/// </summary>
 public struct SignUpStruct
 {
+	/// <summary>
+    /// 仮登録を行うメールアドレス
+    /// </summary>
     public string mail;
 };
 
 
 internal static class Auth
 {
+
+
+    /// <summary>
+    /// セッション管理用のトークンを生成します。
+    /// </summary>
+    /// <returns>
+	/// {
+	/// 	"token": "fba8c49f09f140d693ddf2a33491a82e"
+	/// }
+    /// </returns>
+	/// <response code="200">正常にトークンの生成処理が実行されました。</response>
+	/// <response code="500">トークン生成中に例外が発生しました。</response>
+    [HttpGet]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static dynamic GenerateToken()
@@ -42,15 +61,23 @@ internal static class Auth
 	}
 
 
+    /// <summary>
+    /// 指定したトークンがログイン情報を保有しているかを判定します。
+    /// </summary>
+    /// <returns>
+	/// {
+	/// 	"is_login": true
+	/// }
+	/// </returns>
+	/// <response code="200">正常にログイン中かどうかを判定できました。</response>
+	/// <response code="400">指定したトークンが不正です。</response>
+	/// <response code="500">ログイン判定中に例外が発生しました。</response>
+    [HttpGet]
+	[Route("auth/is_login")]
+	[Produces("application/json")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    /// <summary>
-    /// 指定した ID に紐付く注文情報を取得します。
-    /// </summary>
-    /// <param name="orderId">取得する注文情報の ID。</param>
-    /// <returns>取得した注文情報。</returns>
-    [HttpGet("{orderId}")]
 	internal static IResult IsLogin(HttpContext context)
 	{
 		try
@@ -78,11 +105,11 @@ internal static class Auth
 
 			if (result["user_id"] != DBNull.Value)
 			{
-				return Results.Ok(new {IsLogin = true});
+				return Results.Ok(new {is_login = true});
 			}
 			else
 			{
-				return Results.Ok(new {IsLogin = false});
+				return Results.Ok(new {is_login = false});
 			}
 		}
 		catch
@@ -91,8 +118,32 @@ internal static class Auth
 		}
 	}
 
-	[ProducesResponseType(StatusCodes.Status201Created)]
+
+    /// <summary>
+    /// 指定したメールアドレスを対象に仮会員登録処理を行います。
+    /// </summary>
+	/// <remarks>
+	/// Sample request:
+	///
+	/// 	POST /auth/signup
+	/// 	{
+	/// 		"mail": "test@example.com"
+	/// 	}
+	///
+	/// </remarks>
+    /// <returns>
+	/// { "a": "b"}
+	/// </returns>
+	/// <param name="signUpStruct"></param>
+	/// <response code="200">正常に仮会員登録処理が完了しました。</response>
+	/// <response code="400">不正なメールアドレスが指定されました。</response>
+	/// <response code="500">会員登録処理中に例外が発生しました。</response>
+	[Route("auth/is_login")]
+	[Produces("application/json")]
+	[HttpPost]
+	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult SignUp(SignUpStruct signUpStruct)
 	{
 		string mail = signUpStruct.mail;
