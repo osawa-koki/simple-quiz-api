@@ -141,7 +141,7 @@ internal static class Auth
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult SignUp(SignUpStruct signUpStruct)
+	internal static IResult PreSignUp(SignUpStruct signUpStruct)
 	{
 		string mail = signUpStruct.mail;
 		try
