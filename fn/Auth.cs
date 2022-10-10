@@ -279,6 +279,10 @@ internal static class Auth
 				return Results.BadRequest(new { message = "ユーザ名の長さが不正です。"});
 			}
 			// パスワードのチェック
+			if (!Regex.IsMatch(password, @"^[a-zA-Z0-9-/:-@\[-\`\{-\~]+$"))
+			{
+				return Results.BadRequest(new { message = "パスワードは空白類似文字を除いた半角英数字のみで構成してください。"});
+			}
 			if (password.Length < 8 || 32 < password.Length)
 			{
 				return Results.BadRequest(new { message = "パスワードの文字数が不正です。"});
