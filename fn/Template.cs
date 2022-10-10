@@ -8,6 +8,19 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.Json;
 
 
+/// <summary>
+/// テンプレート構造体
+/// </summary>
+internal struct TemplateStruct
+{
+	internal int quiztemplate_id;
+	internal bool is_public;
+	internal string content;
+	internal List<string> keywords;
+}
+
+
+
 internal static class Template
 {
 
