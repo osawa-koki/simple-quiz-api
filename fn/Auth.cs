@@ -206,15 +206,17 @@ internal static class Auth
 
 
 			// 一定時間前に送信してたら
-			client.Add("SELECT pre_user");
+			client.Add("SELECT pre_user_id");
 			client.Add("FROM pre_users");
-			client.Add("WHERE pre_user = @pre_user");
+			client.Add("WHERE pre_user_id = @pre_user_id");
 			client.Add("	AND DATEADD(SECOND, -30, GETDATE()) < updt;");
+			client.AddParam(mail);
+			client.SetDataType("@pre_user_id", SqlDbType.VarChar);
 			if (client.Select() != null) return Results.BadRequest(new { message = "30秒以上間隔を開けてください。"});
 
 			// トークンをセット
 			string token = Guid.NewGuid().ToString("N");
-			client.Add($"EXEC set_mail_token @pre_user_id = '{mail.Replace("'", "''")}, @token = '{token.Replace("'", "''")}';"); // SQLインジェクション攻撃対策
+			client.Add($"EXEC set_mail_token @pre_user_id = '{mail.Replace("'", "''")}', @token = '{token.Replace("'", "''")}';"); // SQLインジェクション攻撃対策
 			client.Execute();
 
 
@@ -234,9 +236,9 @@ internal static class Auth
 				return Results.Problem();
 			}
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
