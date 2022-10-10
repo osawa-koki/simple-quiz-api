@@ -331,8 +331,6 @@ internal static class Template
 			client.Add(string.Join(",", keywords) + ";");
 			client.Execute();
 
-			client.Execute();
-
 			return Results.Ok(new {});
 
 		}
