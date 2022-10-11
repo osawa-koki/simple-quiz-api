@@ -27,7 +27,7 @@ internal struct TemplateStruct
 internal static class Template
 {
 
-	    /// <summary>
+	/// <summary>
     /// テンプレート詳細取得
     /// </summary>
 	/// <remarks>
