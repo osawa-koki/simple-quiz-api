@@ -30,9 +30,9 @@ public struct SignUpStruct
     /// </summary>
     public string token;
 	/// <summary>
-    /// ユーザ名(50文字以内)
+    /// ユーザ名(16文字以内)
     /// </summary>
-    public string user_name;
+    public string user_id;
 	/// <summary>
     /// パスワード(8-32)
     /// </summary>
@@ -46,9 +46,9 @@ public struct SignUpStruct
 public struct SignInStruct
 {
 	/// <summary>
-    /// メール
+    /// メール or ユーザID
     /// </summary>
-    public string user_id;
+    public string uid;
 	/// <summary>
     /// パスワード(8-32)
     /// </summary>
@@ -199,24 +199,24 @@ internal static class Auth
 			// 既に登録済みかチェック
 			client.Add("SELECT user_id");
 			client.Add("FROM users");
-			client.Add("WHERE user_id = @user_id");
+			client.Add("WHERE mail = @mail");
 			client.AddParam(mail);
-			client.SetDataType("@user_id", SqlDbType.VarChar);
+			client.SetDataType("@mail", SqlDbType.VarChar);
 			if (client.Select() != null) return Results.BadRequest(new { message = "既に登録済みのメールアドレスです。"});
 
 
 			// 一定時間前に送信してたら
-			client.Add("SELECT pre_user_id");
+			client.Add("SELECT mail");
 			client.Add("FROM pre_users");
-			client.Add("WHERE pre_user_id = @pre_user_id");
+			client.Add("WHERE mail = @mail");
 			client.Add("	AND DATEADD(SECOND, -30, GETDATE()) < updt;");
 			client.AddParam(mail);
-			client.SetDataType("@pre_user_id", SqlDbType.VarChar);
+			client.SetDataType("@mail", SqlDbType.VarChar);
 			if (client.Select() != null) return Results.BadRequest(new { message = "30秒以上間隔を開けてください。"});
 
 			// トークンをセット
 			string token = Guid.NewGuid().ToString("N");
-			client.Add($"EXEC set_mail_token @pre_user_id = '{mail.Replace("'", "''")}', @token = '{token.Replace("'", "''")}';"); // SQLインジェクション攻撃対策
+			client.Add($"EXEC set_mail_token @mail = '{mail.Replace("'", "''")}', @token = '{token.Replace("'", "''")}';"); // SQLインジェクション攻撃対策
 			client.Execute();
 
 
@@ -252,7 +252,7 @@ internal static class Auth
 	/// 	POST /auth/signup
 	/// 	{
 	/// 		"token": "fba8c49f09f140d693ddf2a33491a82e",
-	/// 		"user_name": "hogehoge",
+	/// 		"user_id": "hogehoge",
 	/// 		"password": "foofoo",
 	/// 		"comment": "hogefoo"
 	/// 	}
@@ -271,14 +271,14 @@ internal static class Auth
 	internal static IResult SignUp(SignUpStruct signUpStruct)
 	{
 		string token = signUpStruct.token;
-		string user_name = signUpStruct.user_name;
+		string user_id = signUpStruct.user_id;
 		string password = signUpStruct.password;
 		try
 		{
 			// ユーザ名のチェック
-			if (user_name.Length < 3 || 50 < user_name.Length)
+			if (user_id.Length < 3 || 16 < user_id.Length)
 			{
-				return Results.BadRequest(new { message = "ユーザ名の長さが不正です。"});
+				return Results.BadRequest(new { message = "ユーザIDの長さが不正です。"});
 			}
 			// パスワードのチェック
 			if (!Regex.IsMatch(password, @"^[a-zA-Z0-9-/:-@\[-\`\{-\~]+$"))
@@ -294,7 +294,7 @@ internal static class Auth
 
 			// トークンのチェック
 
-			client.Add("SELECT pre_user_id");
+			client.Add("SELECT mail");
 			client.Add("FROM pre_users");
 			client.Add("WHERE token = @token");
 			client.Add("	AND DATEADD(MINUTE, -30, GETDATE()) < updt");
@@ -302,18 +302,18 @@ internal static class Auth
 			client.SetDataType("@token", SqlDbType.VarChar);
 			var result = client.Select();
 			if (result == null) return Results.BadRequest(new { message = "指定したトークンは無効です。"});
-			string pre_user_id = ((string)result["pre_user_id"]).ToString();
+			string mail = ((string)result["mail"]).ToString();
 
 
 			// 本登録処理
-			string? hashed_password = Util.HashPassword(pre_user_id + password);
+			string? hashed_password = Util.HashPassword($"@{password}@");
 			if (hashed_password == null) return Results.Problem();
 
 			client.Add("INSERT INTO users(user_id, pw, user_name, comment)");
 			client.Add("VALUES(@user_id, @pw, @user_name, @comment)");
-			client.AddParam(pre_user_id);
+			client.AddParam(mail);
 			client.AddParam(hashed_password);
-			client.AddParam(user_name);
+			client.AddParam(user_id);
 			client.AddParam(password);
 			client.SetDataType("@user_id", SqlDbType.VarChar);
 			client.SetDataType("@pw", SqlDbType.VarChar);
@@ -394,18 +394,14 @@ internal static class Auth
 		}
 		try
 		{
-			string user_id = signInStruct.user_id;
+			string uid = signInStruct.uid;
 			string password = signInStruct.password;
 
 
 			// メールアドレスのチェック
-			if (!Regex.IsMatch(user_id, @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"))
+			if (!Regex.IsMatch(uid, @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$") && !(uid.Length < 3 || 16 < uid.Length))
 			{
-				return Results.BadRequest(new { message = "メールアドレスの形式が不正です。"});
-			}
-			if (254 < user_id.Length)
-			{
-				return Results.BadRequest(new { message = "メールアドレスは254文字以内で入力してください。"});
+				return Results.BadRequest(new { message = "メールアドレス、またはユーザIDの形式が不正です。"});
 			}
 
 			if (!Regex.IsMatch(password, @"^[a-zA-Z0-9-/:-@\[-\`\{-\~]+$"))
@@ -418,15 +414,17 @@ internal static class Auth
 			}
 
 			// 認証チェック
-			var hashed_password = Util.HashPassword(user_id + password);
+			var hashed_password = Util.HashPassword($"@{password}@");
 			if (hashed_password == null) return Results.Problem();
 
 			DBClient client = new();
 			client.Add("SELECT user_id");
 			client.Add("FROM users");
-			client.Add("WHERE user_id = @user_id AND pw = @pw;");
-			client.AddParam(user_id);
+			client.Add("WHERE (user_id = @uid OR mail = @uid) AND pw = @pw;");
+			client.AddParam(uid);
+			client.AddParam(uid);
 			client.AddParam(hashed_password);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
 			client.SetDataType("@user_id", SqlDbType.VarChar);
 			client.SetDataType("@pw", SqlDbType.VarChar);
 
