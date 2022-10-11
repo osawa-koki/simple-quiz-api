@@ -2,7 +2,7 @@
 
 CREATE TABLE room_users(
 	room_id VARCHAR(32),
-	user_id VARCHAR(254),
+	user_id VARCHAR(16),
 	rgdt DATETIME DEFAULT CURRENT_TIMESTAMP,
 	updt DATETIME DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY(room_id, user_id),

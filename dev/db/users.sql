@@ -1,7 +1,8 @@
 -- ユーザ情報
 
 CREATE TABLE users(
-	user_id VARCHAR(254) PRIMARY KEY,
+	user_id VARCHAR(16) PRIMARY KEY
+	mail VARCHAR(254) UNIQUE,
 	pw VARCHAR(512) NOT NULL,
 	user_name NVARCHAR(50) NOT NULL,
 	comment NVARCHAR(300) DEFAULT '',
