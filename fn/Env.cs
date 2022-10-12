@@ -1,3 +1,4 @@
+using dotenv.net;
 
 internal static class Env
 {
