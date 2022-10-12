@@ -29,7 +29,9 @@ internal static class Room
 	///				"room_icon": "3ddf2a33491a82efba8c49f09f140d69.png",
 	///				"explanation": "ITに関する簡単なクイズで～す。",
 	///				"rgdt": "2022-10-25 11:...",
-	///				"updt": "2022-11-15 11:..."
+	///				"updt": "2022-11-15 11:...",
+	///				"user_name": "koko",
+	///				"user_icon": "140d693ddf2a33491a82efba8c49f09f"
 	/// 		}
 	/// 	]
     /// </returns>
@@ -72,10 +74,10 @@ internal static class Room
 			var user_id = client.Select()?["user_id"]?.ToString() ?? "";
 
 
-			client.Add("SELECT r.room_id, r.room_name, r.room_icon, r.explanation, r.rgdt, r.updt, u.");
+			client.Add("SELECT r.room_id, r.room_name, r.room_icon, r.explanation, r.rgdt, r.updt, u.user_name, u.user_icon");
 			client.Add("FROM rooms r");
 			client.Add("LEFT JOIN room_owners ow ON r.room_id = ow.room_id");
-			client.Add("LEFT JOIN room_owners ow ON r.room_id = ow.room_id");
+			client.Add("LEFT JOIN users u ON ow.user_id = u.user_id");
 			client.Add("WHERE r.is_public = 1 OR ow.user_id = @user_id OR ow.session_id = @session_id;");
 			client.AddParam(user_id);
 			client.AddParam(session_id);
