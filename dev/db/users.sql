@@ -3,6 +3,7 @@
 CREATE TABLE users(
 	user_id VARCHAR(16) PRIMARY KEY,
 	mail VARCHAR(254) UNIQUE,
+	user_name VARCHAR(25) NULL,
 	pw VARCHAR(512) NOT NULL,
 	comment NVARCHAR(300) DEFAULT '',
 	user_icon VARCHAR(32) NULL,
