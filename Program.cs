@@ -128,6 +128,7 @@ app.MapDelete("/template/{template_id}", Template.Delete);
 // =====       ルーム       =====
 // ==============================
 
+app.MapGet("/room/list", Room.List);
 
 
 
