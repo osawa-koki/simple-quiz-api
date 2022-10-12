@@ -130,6 +130,10 @@ app.MapDelete("/template/{template_id}", Template.Delete);
 
 app.MapGet("/room/{room_id}", Room.Detail);
 app.MapGet("/room/list", Room.List);
+// app.MapPost("/room", Room.Create);
+// app.MapPut("/room", Room.Update);
+// app.MapGet("/room/members", Room.Members);
+// app.MapPost("/room/join", Room.Join);
 
 
 
