@@ -22,7 +22,16 @@ internal static class Room
 	/// 	
 	/// </remarks>
     /// <returns>
-	/// {}
+	/// 	[
+	/// 		{
+	///				"room_id": "fba8c49f09f140d693ddf2a33491a82e",
+	///				"room_name": "簡単クイズ♪",
+	///				"room_icon": "3ddf2a33491a82efba8c49f09f140d69.png",
+	///				"explanation": "ITに関する簡単なクイズで～す。",
+	///				"rgdt": "2022-10-25 11:...",
+	///				"updt": "2022-11-15 11:..."
+	/// 		}
+	/// 	]
     /// </returns>
 	/// <response code="200">正常にテンプレート詳細を取得できました。</response>
 	/// <response code="400">不正なパラメタが送信されました。</response>
@@ -63,8 +72,9 @@ internal static class Room
 			var user_id = client.Select()?["user_id"]?.ToString() ?? "";
 
 
-			client.Add("SELECT r.room_id, r.room_name, r.room_icon, r.explanation, r.rgdt, r.updt");
+			client.Add("SELECT r.room_id, r.room_name, r.room_icon, r.explanation, r.rgdt, r.updt, u.");
 			client.Add("FROM rooms r");
+			client.Add("LEFT JOIN room_owners ow ON r.room_id = ow.room_id");
 			client.Add("LEFT JOIN room_owners ow ON r.room_id = ow.room_id");
 			client.Add("WHERE r.is_public = 1 OR ow.user_id = @user_id OR ow.session_id = @session_id;");
 			client.AddParam(user_id);
