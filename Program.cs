@@ -124,4 +124,12 @@ app.MapPut("/template/{template_id}", Template.Update);
 app.MapDelete("/template/{template_id}", Template.Delete);
 
 
+// ==============================
+// =====       ルーム       =====
+// ==============================
+
+
+
+
+
 app.Run();
