@@ -163,9 +163,9 @@ internal static class Auth
 				return Results.Ok(new {is_login = false});
 			}
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
@@ -344,9 +344,9 @@ internal static class Auth
 			
 			return Results.Ok(new {});
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
@@ -391,9 +391,9 @@ internal static class Auth
 				revoke = session_id,
 			});
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
@@ -471,9 +471,9 @@ internal static class Auth
 			}
 			return Results.BadRequest(new { message = "認証に失敗しました。"});
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 

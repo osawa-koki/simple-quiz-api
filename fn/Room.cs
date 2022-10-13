@@ -97,9 +97,9 @@ internal static class Room
 			return Results.Ok(room);
 
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
@@ -181,9 +181,9 @@ internal static class Room
 			return Results.Ok(rooms);
 
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
@@ -287,9 +287,9 @@ internal static class Room
 			return Results.Created($"https://{Env.DOMAIN}/room?room_id={room_id}", null);
 
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
@@ -405,9 +405,9 @@ internal static class Room
 			return Results.Ok(new {});
 
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 

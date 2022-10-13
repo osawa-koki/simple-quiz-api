@@ -113,9 +113,9 @@ internal static class Template
 			return Results.Ok(answer);
 
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
@@ -248,9 +248,9 @@ internal static class Template
 			return Results.Ok(templates);
 
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
@@ -345,9 +345,9 @@ internal static class Template
 
 			return Results.Ok(new {});
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
@@ -464,9 +464,9 @@ internal static class Template
 			return Results.Ok(new {});
 
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
@@ -545,9 +545,9 @@ internal static class Template
 
 			return Results.Ok(new {});
 		}
-		catch
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
