@@ -133,8 +133,9 @@ internal static class Auth
 	{
 		try
 		{
-			Microsoft.Extensions.Primitives.StringValues session_id;
-			bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+			Microsoft.Extensions.Primitives.StringValues session_id_raw;
+			bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+			string session_id = session_id_raw.ToString();
 			if (!auth_filled || session_id == "")
 			{
 				return Results.BadRequest(new { message = "認証トークンが不在です。"});
