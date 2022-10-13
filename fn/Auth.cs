@@ -63,10 +63,19 @@ internal static class Auth
     /// <summary>
     /// セッション管理用のトークンを生成します。
     /// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	
+	/// 	Get /auth/session_id
+	/// 	
+	/// </remarks>
     /// <returns>
-	/// {
-	/// 	"token": "fba8c49f09f140d693ddf2a33491a82e"
-	/// }
+	/// Sample response:
+	/// 
+	/// 	{
+	/// 		"token": "fba8c49f09f140d693ddf2a33491a82e"
+	/// 	}
+	/// 
     /// </returns>
 	/// <response code="200">正常にトークンの生成処理が実行されました。</response>
 	/// <response code="500">トークン生成中に例外が発生しました。</response>
@@ -100,6 +109,12 @@ internal static class Auth
     /// <summary>
     /// 指定したトークンがログイン情報を保有しているかを判定します。
     /// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	
+	/// 	Get /auth/sign_in
+	/// 	
+	/// </remarks>
     /// <returns>
 	/// {
 	/// 	"is_login": true
@@ -158,6 +173,12 @@ internal static class Auth
     /// <summary>
     /// 指定したメールアドレスを対象に仮会員登録処理を行います。
     /// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	
+	/// 	Get /auth/pre_signup
+	/// 	
+	/// </remarks>
 	/// <remarks>
 	/// Sample request:
 	///
@@ -335,6 +356,12 @@ internal static class Auth
     /// <summary>
     /// セッション管理用のトークンを無効化します。
     /// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	
+	/// 	Delete /auth/signout
+	/// 	
+	/// </remarks>
     /// <returns>
 	/// {}
     /// </returns>
@@ -374,6 +401,16 @@ internal static class Auth
     /// <summary>
     /// サインイン処理
     /// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	
+	/// 	Post /auth/signin
+	/// 	{
+	/// 		"uid": "メールアドレス or ユーザID",
+	/// 		"pw": "p@ssw0rd"
+	/// 	}
+	/// 	
+	/// </remarks>
     /// <returns>
 	/// {}
     /// </returns>
