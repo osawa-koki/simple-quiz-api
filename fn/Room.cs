@@ -193,16 +193,16 @@ internal static class Room
 	/// ルーム新規作成
 	/// </summary>
 	/// <remarks>
-	/// 	
-	/// 	Sample request:
-	/// 		POST /room
-	/// 		{
-	/// 			"room_name": "ITクイズ大会♪",
-	/// 			"room_icon": "491a82efba8c49f09f140d693ddf2a33.png"
-	/// 			"explanation": "ITに関する簡単なクイズ大会で～す♪"
-	/// 			"pw": null,
-	/// 			"is_public": true
-	/// 		}
+	/// Sample request:
+	/// 
+	/// 	POST /room
+	/// 	{
+	/// 		"room_name": "ITクイズ大会♪",
+	/// 		"room_icon": "491a82efba8c49f09f140d693ddf2a33.png"
+	/// 		"explanation": "ITに関する簡単なクイズ大会で～す♪"
+	/// 		"pw": null,
+	/// 		"is_public": true
+	/// 	}
 	/// 	
 	/// </remarks>
 	/// <returns>
@@ -298,17 +298,17 @@ internal static class Room
 	/// ルーム更新
 	/// </summary>
 	/// <remarks>
+	/// Sample request:
 	/// 	
-	/// 	Sample request:
-	/// 		POST /room
-	/// 		{
-	/// 			"room_id": "c49f09f140d693ddf2a33491a82efba8",
-	/// 			"room_name": "ITクイズ大会♪",
-	/// 			"room_icon": "491a82efba8c49f09f140d693ddf2a33.png"
-	/// 			"explanation": "ITに関する簡単なクイズ大会で～す♪"
-	/// 			"pw": null,
-	/// 			"is_public": true
-	/// 		}
+	/// 	POST /room
+	/// 	{
+	/// 		"room_id": "c49f09f140d693ddf2a33491a82efba8",
+	/// 		"room_name": "ITクイズ大会♪",
+	/// 		"room_icon": "491a82efba8c49f09f140d693ddf2a33.png"
+	/// 		"explanation": "ITに関する簡単なクイズ大会で～す♪"
+	/// 		"pw": null,
+	/// 		"is_public": true
+	/// 	}
 	/// 	
 	/// </remarks>
 	/// <returns>

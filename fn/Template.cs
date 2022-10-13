@@ -27,8 +27,8 @@ internal static class Template
     /// テンプレート詳細取得
     /// </summary>
 	/// <remarks>
+	/// Sample request:
 	/// 	
-	/// 	Sample request:
 	/// 		GET /template/120
 	/// 	
 	/// </remarks>
@@ -38,10 +38,12 @@ internal static class Template
 	/// <response code="200">正常にテンプレート詳細を取得できました。</response>
 	/// <response code="400">不正なパラメタが送信されました。</response>
 	/// <response code="403">指定したテンプレートにアクセスする権限がありません。</response>
+	/// <response code="404">指定したテンプレートは存在しません。</response>
 	/// <response code="500">テンプレート詳細取得処理中に例外が発生しました。</response>
     [HttpGet]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Detail(int template_id, HttpContext context)
@@ -80,7 +82,7 @@ internal static class Template
 
 			if (template == null)
 			{
-				return Results.BadRequest(new {message = "指定したテンプレートIDは存在しません。"});
+				return Results.NotFound(new {message = "指定したテンプレートIDは存在しません。"});
 			}
 
 			if (template["owning_user"].ToString() != user_id && template["owning_session"] != session_id)
@@ -190,8 +192,8 @@ internal static class Template
     /// テンプレート検索
     /// </summary>
 	/// <remarks>
-	/// 	
 	/// Sample request:
+	/// 	
 	/// 	GET /template/search?search_by=ランキング&amp;per_page=30
 	/// 	
 	/// </remarks>
@@ -356,13 +358,14 @@ internal static class Template
     /// <summary>
     /// テンプレート変更
     /// </summary>
+	/// Sample request:
 	/// 	
 	/// 	PUT /template
 	/// 	{
 	/// 		"quiztemplate_id": 100,
 	/// 		"is_public": true,
 	/// 		"content": "世界で${number}番目に高い山は???",
-	/// 		"transfer_to": "hogehoge@exmaple.com",
+	/// 		"transfer_to": "user_hoge",
 	/// 		"keywords": ["ランキング", "山", "教養", "地理"]
 	/// 	}
 	/// 	
@@ -372,11 +375,13 @@ internal static class Template
 	/// <response code="200">指定したテンプレートを正常に変更しました。</response>
 	/// <response code="400">指定したパラメタが不正です。</response>
 	/// <response code="403">指定したテンプレートにアクセスする権限がありません。</response>
+	/// <response code="404">指定したテンプレートは存在しません。</response>
 	/// <response code="500">テンプレートの変更処理中に例外が発生しました。</response>
     [HttpPut]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Update(int template_id, TemplateStruct templateStruct, HttpContext context)
 	{
@@ -407,7 +412,7 @@ internal static class Template
 
 			if (result == null)
 			{
-				return Results.BadRequest(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
+				return Results.NotFound(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
 			}
 
 			var owning_user = result["owning_user"].ToString();
@@ -483,11 +488,13 @@ internal static class Template
 	/// <response code="200">指定したテンプレートを正常に削除しました。</response>
 	/// <response code="400">指定したパラメタが不正です。</response>
 	/// <response code="403">指定したテンプレートにアクセスする権限がありません。</response>
+	/// <response code="404">指定したテンプレートは存在しません。</response>
 	/// <response code="500">テンプレートの削除処理中に例外が発生しました。</response>
     [HttpDelete]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Delete(int template_id, HttpContext context)
 	{
@@ -518,7 +525,7 @@ internal static class Template
 
 			if (result == null)
 			{
-				return Results.BadRequest(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
+				return Results.NotFound(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
 			}
 
 			var owning_user = result["owning_user"].ToString();
