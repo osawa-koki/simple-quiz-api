@@ -53,8 +53,9 @@ internal static class Template
 			return Results.BadRequest(new {message = "テンプレートIDには正の整数を指定してください。"});
 		}
 
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		Microsoft.Extensions.Primitives.StringValues session_id_raw;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+		string session_id = session_id_raw.ToString();
 		if (!auth_filled || session_id == "")
 		{
 			return Results.BadRequest(new { message = "認証トークンが不在です。"});
@@ -150,8 +151,9 @@ internal static class Template
 			return Results.BadRequest("一度に取得できるテンプレート数は30までです。");
 		}
 
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		Microsoft.Extensions.Primitives.StringValues session_id_raw;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+		string session_id = session_id_raw.ToString();
 		if (!auth_filled || session_id == "")
 		{
 			return Results.BadRequest(new { message = "認証トークンが不在です。"});
@@ -218,8 +220,9 @@ internal static class Template
 			return Results.BadRequest("一度に取得できるテンプレート数は30までです。");
 		}
 
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		Microsoft.Extensions.Primitives.StringValues session_id_raw;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+		string session_id = session_id_raw.ToString();
 		if (!auth_filled || session_id == "")
 		{
 			return Results.BadRequest(new { message = "認証トークンが不在です。"});
@@ -281,8 +284,9 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Create(TemplateStruct templateStruct, HttpContext context)
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		Microsoft.Extensions.Primitives.StringValues session_id_raw;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+		string session_id = session_id_raw.ToString();
 		if (!auth_filled || session_id == "")
 		{
 			return Results.BadRequest(new { message = "認証トークンが不在です。"});
@@ -385,8 +389,9 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Update(int template_id, TemplateStruct templateStruct, HttpContext context)
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		Microsoft.Extensions.Primitives.StringValues session_id_raw;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+		string session_id = session_id_raw.ToString();
 		if (!auth_filled || session_id == "")
 		{
 			return Results.BadRequest(new { message = "認証トークンが不在です。"});
@@ -498,8 +503,9 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Delete(int template_id, HttpContext context)
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		Microsoft.Extensions.Primitives.StringValues session_id_raw;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+		string session_id = session_id_raw.ToString();
 		if (!auth_filled || session_id == "")
 		{
 			return Results.BadRequest(new { message = "認証トークンが不在です。"});

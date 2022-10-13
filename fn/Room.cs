@@ -60,9 +60,9 @@ internal static class Room
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Detail(string room_id, HttpContext context)
 	{
-
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		Microsoft.Extensions.Primitives.StringValues session_id_raw;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+		string session_id = session_id_raw.ToString();
 		if (!auth_filled || session_id == "")
 		{
 			return Results.BadRequest(new { message = "認証トークンが不在です。"});
@@ -147,8 +147,9 @@ internal static class Room
 			return Results.BadRequest("一度に取得できるルーム数は30までです。");
 		}
 
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		Microsoft.Extensions.Primitives.StringValues session_id_raw;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+		string session_id = session_id_raw.ToString();
 		if (!auth_filled || session_id == "")
 		{
 			return Results.BadRequest(new { message = "認証トークンが不在です。"});
@@ -219,8 +220,9 @@ internal static class Room
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Create(RoomCreateStruct roomCreateStruct, HttpContext context)
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		Microsoft.Extensions.Primitives.StringValues session_id_raw;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+		string session_id = session_id_raw.ToString();
 		if (!auth_filled || session_id == "")
 		{
 			return Results.BadRequest(new { message = "認証トークンが不在です。"});
@@ -325,8 +327,9 @@ internal static class Room
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Update(RoomUpdateStruct roomUpdateStruct, HttpContext context)
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
+		Microsoft.Extensions.Primitives.StringValues session_id_raw;
+		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+		string session_id = session_id_raw.ToString();
 		if (!auth_filled || session_id == "")
 		{
 			return Results.BadRequest(new { message = "認証トークンが不在です。"});
