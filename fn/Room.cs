@@ -275,6 +275,12 @@ internal static class Room
 			client.AddParam(explanation != null ? explanation : DBNull.Value);
 			client.AddParam(password != null ? password : DBNull.Value);
 			client.AddParam(is_public ? 1 : 0);
+			client.SetDataType("@room_id", SqlDbType.VarChar);
+			client.SetDataType("@room_name", SqlDbType.VarChar);
+			client.SetDataType("@room_icon", SqlDbType.VarChar);
+			client.SetDataType("@explanation", SqlDbType.VarChar);
+			client.SetDataType("@pw", SqlDbType.VarChar);
+			client.SetDataType("@is_public", SqlDbType.Bit);
 
 			client.Execute();
 
