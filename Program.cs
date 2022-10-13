@@ -132,6 +132,12 @@ app.MapGet("/room/{room_id}", Room.Detail);
 app.MapGet("/room/list", Room.List);
 app.MapPost("/room", Room.Create);
 app.MapPut("/room", Room.Update);
+
+app.MapGet("/room/quiz", Room.QuizGet);
+app.MapPost("/room/quiz", Room.QuizAdd);
+app.MapPut("/room/quiz", Room.QuizUpdate);
+app.MapDelete("/room/quiz", Room.QuizDelete);
+
 // app.MapGet("/room/members", Room.Members);
 // app.MapPost("/room/join", Room.Join);
 
