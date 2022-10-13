@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 /// <summary>
 /// テンプレート構造体
 /// </summary>
-internal struct TemplateStruct
+internal struct TemplateSummaryStruct
 {
 	internal int? quiztemplate_id;
 	internal bool is_public;
@@ -88,7 +88,7 @@ internal static class Template
 				return Results.Forbid();
 			}
 
-			TemplateStruct answer = new();
+			TemplateSummaryStruct answer = new();
 			answer.quiztemplate_id = template_id;
 			answer.is_public = int.Parse(template["is_public"]?.ToString() ?? "-1") == 1;
 			answer.content = template["content"].ToString() ?? "*****";
@@ -277,7 +277,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Create(TemplateStruct templateStruct, HttpContext context)
+	internal static IResult Create(TemplateSummaryStruct templateStruct, HttpContext context)
 	{
 		Microsoft.Extensions.Primitives.StringValues session_id;
 		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
@@ -378,7 +378,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Update(int template_id, TemplateStruct templateStruct, HttpContext context)
+	internal static IResult Update(int template_id, TemplateSummaryStruct templateStruct, HttpContext context)
 	{
 		Microsoft.Extensions.Primitives.StringValues session_id;
 		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
