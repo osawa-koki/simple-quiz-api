@@ -6,6 +6,9 @@ using System.Web;
 using MailMod;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http.Json;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authorization;
 
 
 /// <summary>
@@ -56,6 +59,7 @@ public struct SignInStruct
 };
 
 
+
 internal static class Auth
 {
 
@@ -80,6 +84,7 @@ internal static class Auth
 	/// <response code="200">正常にトークンの生成処理が実行されました。</response>
 	/// <response code="500">トークン生成中に例外が発生しました。</response>
     [HttpGet]
+	[AllowAnonymous]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static dynamic GenerateToken()
@@ -126,6 +131,7 @@ internal static class Auth
     [HttpGet]
 	[Route("auth/is_login")]
 	[Produces("application/json")]
+	[Authorize(AuthenticationSchemes = "Bearer")]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
