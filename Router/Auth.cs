@@ -43,21 +43,8 @@ public struct SignUpStruct
 };
 
 
-/// <summary>
-/// "/auth/signin"に送るJSONデータ
-/// </summary>
-public struct SignInStruct
-{
-	/// <summary>
-    /// メール or ユーザID
-    /// </summary>
-    public string uid;
-	/// <summary>
-    /// パスワード(8-32)
-    /// </summary>
-    public string password;
-};
 
+public record SignInStruct(string uid, string password);
 
 
 internal static class Auth
