@@ -61,7 +61,7 @@ internal static class Auth
 
 
     /// <summary>
-    /// セッション管理用のトークンを生成します。
+    /// 【完成】セッション管理用のトークンを生成します。
     /// </summary>
 	/// <remarks>
 	/// Sample request:
@@ -116,9 +116,9 @@ internal static class Auth
 	/// 	
 	/// </remarks>
     /// <returns>
-	/// {
-	/// 	"is_login": true
-	/// }
+	/// 	{
+	/// 		"is_login": true
+	/// 	}
 	/// </returns>
 	/// <response code="200">正常にログイン中かどうかを判定できました。</response>
 	/// <response code="400">指定したトークンが不正です。</response>
@@ -129,17 +129,18 @@ internal static class Auth
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult IsLogin(HttpContext context)
+	internal static IResult IsLogin([FromHeader(Name = "Authorization")] string session_id)
 	{
+		return Results.Ok(session_id);
 		try
 		{
-			Microsoft.Extensions.Primitives.StringValues session_id_raw;
-			bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
-			string session_id = session_id_raw.ToString();
-			if (!auth_filled || session_id == "")
-			{
-				return Results.BadRequest(new { message = "認証トークンが不在です。"});
-			}
+			// Microsoft.Extensions.Primitives.StringValues session_id_raw;
+			// bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
+			// string session_id = session_id_raw.ToString();
+			// if (!auth_filled || session_id == "")
+			// {
+			// 	return Results.BadRequest(new { message = "認証トークンが不在です。"});
+			// }
 
 			DBClient client = new();
 			client.Add("SELECT user_id");
