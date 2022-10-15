@@ -11,7 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 
 
-public record SignUpStruct(string token, string user_id, string password, string comment);
+public record SignUpStruct(string token, string user_id, string password, string user_name, string comment);
 public record SignInStruct(string uid, string password);
 
 internal static class Auth
@@ -241,6 +241,7 @@ internal static class Auth
 		string token = signUpStruct.token;
 		string user_id = signUpStruct.user_id;
 		string password = signUpStruct.password;
+		string user_name = signUpStruct.user_name;
 		string comment = signUpStruct.comment;
 		try
 		{
@@ -278,13 +279,15 @@ internal static class Auth
 			string? hashed_password = Util.Hasher_sha256($"@{password}@");
 			if (hashed_password == null) return Results.Problem("ハッシュ生成に失敗しました。");
 
-			client.Add("INSERT INTO users(user_id, pw, user_name, comment)");
-			client.Add("VALUES(@user_id, @pw, @user_name, @comment)");
+			client.Add("INSERT INTO users(user_id, mail, pw, user_name, comment)");
+			client.Add("VALUES(@user_id, @mail, @pw, @user_name, @comment)");
+			client.AddParam(user_id);
 			client.AddParam(mail);
 			client.AddParam(hashed_password);
-			client.AddParam(user_id);
+			client.AddParam(user_name);
 			client.AddParam(comment);
 			client.SetDataType("@user_id", SqlDbType.VarChar);
+			client.SetDataType("@mail", SqlDbType.VarChar);
 			client.SetDataType("@pw", SqlDbType.VarChar);
 			client.SetDataType("@user_name", SqlDbType.VarChar);
 			client.SetDataType("@comment", SqlDbType.VarChar);
