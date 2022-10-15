@@ -270,7 +270,7 @@ internal static class Auth
 			client.SetDataType("@token", SqlDbType.VarChar);
 			var result = client.Select();
 			if (result == null) return Results.BadRequest(new { message = "指定したトークンは無効です。"});
-			string mail = ((string)result["mail"]).ToString();
+			string mail = (string)result["mail"];
 
 
 			// 本登録処理
