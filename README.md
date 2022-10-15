@@ -119,7 +119,7 @@ sqlcmd -S localhost -U sa -P 'simplequizapi_pw1234'
 ```bash
 sudo docker pull mcr.microsoft.com/mssql/server:2022-latest
 
-sudo docker run -v /home/db_vol -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=simplequizapi_pw1234" \
+sudo docker run --mount 'type=volume,src=simplequiz_db,dst=/usr/simplequiz_db' -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=simplequizapi_pw1234" \
    -p 1433:1433 --name sql1 --hostname sql1 \
    -d \
    mcr.microsoft.com/mssql/server:2022-latest
