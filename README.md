@@ -14,6 +14,20 @@
 # 環境構築
 
 
+# .envファイルの設定
+
+```
+DOMAIN=""
+
+CONNECTION_STRING=""
+
+SMTP_SERVER=""
+SMTP_PORT=""
+SMTP_USER=""
+SMTP_PASSWORD=""
+```
+
+
 ## .NET環境のインストール
 
 ```bash
