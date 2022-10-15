@@ -11,29 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 
 
-
-/// <summary>
-/// "/auth/signup"に送るJSONデータ
-/// </summary>
-public struct SignUpStruct
-{
-	/// <summary>
-    /// 仮会員登録時に発行したトークン
-    /// </summary>
-    public string token;
-	/// <summary>
-    /// ユーザ名(16文字以内)
-    /// </summary>
-    public string user_id;
-	/// <summary>
-    /// パスワード(8-32)
-    /// </summary>
-    public string password;
-};
-
-
-
-public record SignInStruct(string uid, string password);
+public record SignUpStruct(string token, string user_id, string password);
 
 
 internal static class Auth
