@@ -276,7 +276,7 @@ internal static class Auth
 
 			// 本登録処理
 			string? hashed_password = Util.HashPassword($"@{password}@");
-			if (hashed_password == null) return Results.Problem();
+			if (hashed_password == null) return Results.Problem("ハッシュ生成に失敗しました。");
 
 			client.Add("INSERT INTO users(user_id, pw, user_name, comment)");
 			client.Add("VALUES(@user_id, @pw, @user_name, @comment)");
