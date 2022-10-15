@@ -98,7 +98,7 @@ internal static class Auth
 
 
     /// <summary>
-    /// 指定したトークンがログイン情報を保有しているかを判定します。
+    /// 【完成】指定したトークンがログイン情報を保有しているかを判定します。
     /// </summary>
 	/// <remarks>
 	/// Sample request:
