@@ -35,7 +35,7 @@ internal static class Env
 
 
 		// SMTPサーバ
-		string SMTPSERVER_WORD = "SMTPSERVER";
+		string SMTPSERVER_WORD = "SMTP_SERVER";
 		if (!envVars.ContainsKey(SMTPSERVER_WORD))
 		{
 			Error($"{SMTPSERVER_WORD}が未設定です。");
