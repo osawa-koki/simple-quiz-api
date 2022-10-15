@@ -327,14 +327,8 @@ internal static class Auth
     [HttpDelete]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static dynamic SignOut(HttpContext context)
+	internal static dynamic SignOut([FromHeader(Name = "Authorization")] string session_id)
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
-		if (!auth_filled || session_id == "")
-		{
-			return Results.BadRequest(new { message = "認証トークンが不在です。"});
-		}
 		try
 		{
 			DBClient client = new();
