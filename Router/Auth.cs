@@ -265,7 +265,7 @@ internal static class Auth
 			client.Add("SELECT mail");
 			client.Add("FROM pre_users");
 			client.Add("WHERE token = @token");
-			client.Add("	AND DATEADD(MINUTE, -30, GETDATE()) < updt");
+			client.Add("	AND DATEADD(MINUTE, -10, GETDATE()) < updt");
 			client.AddParam(token);
 			client.SetDataType("@token", SqlDbType.VarChar);
 			var result = client.Select();
