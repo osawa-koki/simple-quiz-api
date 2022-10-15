@@ -11,17 +11,6 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 
 
-/// <summary>
-/// "/auth/pre_signup"に送るJSONデータ
-/// </summary>
-public struct PreSignUpStruct
-{
-	/// <summary>
-    /// 仮登録を行うメールアドレス
-    /// </summary>
-    public string mail;
-};
-
 
 /// <summary>
 /// "/auth/signup"に送るJSONデータ
@@ -182,9 +171,8 @@ internal static class Auth
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult PreSignUp(PreSignUpStruct preSignUpStruct)
+	internal static IResult PreSignUp(string mail)
 	{
-		string mail = preSignUpStruct.mail;
 		try
 		{
 			// メールアドレスのチェック
@@ -197,9 +185,7 @@ internal static class Auth
 				return Results.BadRequest(new { message = "メールアドレスは254文字以内で入力してください。"});
 			}
 
-
 			DBClient client = new();
-
 
 			// 既に登録済みかチェック
 			client.Add("SELECT user_id");
@@ -224,7 +210,6 @@ internal static class Auth
 			client.Add($"EXEC set_mail_token @mail = '{mail.Replace("'", "''")}', @token = '{token.Replace("'", "''")}';"); // SQLインジェクション攻撃対策
 			client.Execute();
 
-
 			MailSetting mailSetting = new()
 			{
 				MailTo = mail,
@@ -238,7 +223,7 @@ internal static class Auth
 			}
 			else
 			{
-				return Results.Problem();
+				return Results.Problem($"メールの送信に失敗しました。");
 			}
 		}
 		catch (Exception ex)
