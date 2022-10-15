@@ -338,15 +338,12 @@ internal static class Auth
 		try
 		{
 			DBClient client = new();
-			client.Add("UPDATE sessions");
-			client.Add("SET is_valid = 0");
+			client.Add("DELETE FROM sessions");
 			client.Add("WHERE session_id = @session_id;");
 			client.AddParam(session_id);
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			client.Execute();
-			return Results.Ok(new {
-				revoke = session_id,
-			});
+			return Results.Ok();
 		}
 		catch (Exception ex)
 		{
