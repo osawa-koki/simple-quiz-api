@@ -11,7 +11,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 
 
-public record SignUpStruct(string token, string user_id, string password);
+public record SignUpStruct(string token, string user_id, string password, string comment);
 public record SignInStruct(string uid, string password);
 
 internal static class Auth
@@ -241,6 +241,7 @@ internal static class Auth
 		string token = signUpStruct.token;
 		string user_id = signUpStruct.user_id;
 		string password = signUpStruct.password;
+		string comment = signUpStruct.comment;
 		try
 		{
 			// ユーザ名のチェック
@@ -282,7 +283,7 @@ internal static class Auth
 			client.AddParam(mail);
 			client.AddParam(hashed_password);
 			client.AddParam(user_id);
-			client.AddParam(password);
+			client.AddParam(comment);
 			client.SetDataType("@user_id", SqlDbType.VarChar);
 			client.SetDataType("@pw", SqlDbType.VarChar);
 			client.SetDataType("@user_name", SqlDbType.VarChar);
