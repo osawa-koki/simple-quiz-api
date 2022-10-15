@@ -422,7 +422,7 @@ internal static class Auth
 
 
     /// <summary>
-    /// ユーザID使用判定
+    /// 【完成】ユーザID使用判定
     /// </summary>
 	/// <remarks>
 	/// Sample request:
