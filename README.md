@@ -6,6 +6,7 @@
 | 機能 | バージョン |
 | ---- | ---- |
 | Linux/Ubuntu | 20.4.* |
+| Linux/Debian | 11.* |
 | .NET | 6.0 |
 | C# | .NET依存 |
 | ASP.NET | 6.2.3 |
@@ -28,7 +29,7 @@ SMTP_PASSWORD=""
 ```
 
 
-## .NET環境のインストール
+## .NET環境のインストール (Ubuntu 20.*)
 
 ```bash
 wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
@@ -45,10 +46,26 @@ sudo apt-get install -y dotnet-sdk-6.0
 dotnet run
 ```
 
+## .NET環境のインストール (Debian 11.*)
 
-## SQL Serverのインストール
+```bash
+wget https://packages.microsoft.com/config/debian/11/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+sudo dpkg -i packages-microsoft-prod.deb
+rm packages-microsoft-prod.deb
 
-Ubuntu 22.4.*系だと正常にインストールできません。
+sudo apt-get update && \
+  sudo apt-get install -y dotnet-sdk-6.0
+```
+
+プロジェクトの実行
+
+```bash
+dotnet run
+```
+
+
+## SQL Serverのインストール (Ubuntu 20.*)
+
 
 ```bash
 sudo apt-get install wget
@@ -96,6 +113,23 @@ source ~/.bashrc
 sqlcmd -S localhost -U sa -P 'simplequizapi_pw1234'
 ```
 
+## SQL Serverのインストール (Docker)
+
+
+```bash
+sudo docker pull mcr.microsoft.com/mssql/server:2022-latest
+
+sudo docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=simplequizapi_pw1234" \
+   -p 1433:1433 --name sql1 --hostname sql1 \
+   -d \
+   mcr.microsoft.com/mssql/server:2022-latest
+```
+
+
+```bash
+sudo docker exec -it sql1 "bash"
+/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "simplequizapi_pw1234"
+```
 
 
 
