@@ -293,6 +293,12 @@ internal static class Auth
 			client.SetDataType("@comment", SqlDbType.VarChar);
 			client.Execute();
 			
+			client.Add("DELETE FROM pre_users");
+			client.Add("WHERE token = @token");
+			client.AddParam(token);
+			client.SetDataType("@token", SqlDbType.VarChar);
+			client.Execute();
+
 			return Results.Ok(new {});
 		}
 		catch (Exception ex)
