@@ -122,17 +122,8 @@ internal static class Auth
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult IsLogin([FromHeader(Name = "Authorization")] string session_id)
 	{
-		return Results.Ok(session_id);
 		try
 		{
-			// Microsoft.Extensions.Primitives.StringValues session_id_raw;
-			// bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
-			// string session_id = session_id_raw.ToString();
-			// if (!auth_filled || session_id == "")
-			// {
-			// 	return Results.BadRequest(new { message = "認証トークンが不在です。"});
-			// }
-
 			DBClient client = new();
 			client.Add("SELECT user_id");
 			client.Add("FROM sessions");
