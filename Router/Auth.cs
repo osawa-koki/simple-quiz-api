@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 
 
 public record SignUpStruct(string token, string user_id, string password);
-
+public record SignInStruct(string uid, string password);
 
 internal static class Auth
 {
@@ -368,14 +368,8 @@ internal static class Auth
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static dynamic SignIn(SignInStruct signInStruct, HttpContext context)
+	internal static dynamic SignIn(SignInStruct signInStruct, [FromHeader(Name = "Authorization")] string session_id)
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id);
-		if (!auth_filled || session_id == "")
-		{
-			return Results.BadRequest(new { message = "認証トークンが不在です。"});
-		}
 		try
 		{
 			string uid = signInStruct.uid;
