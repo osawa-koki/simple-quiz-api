@@ -1,23 +1,22 @@
 
+
 CREATE PROCEDURE set_mail_token
-@pre_user_id VARCHAR(254)
+@mail VARCHAR(254),
 @token VARCHAR(32)
 AS
 BEGIN
 
-
 DECLARE @is_exist BIT = 0;
-
 
 SELECT @is_exist = 1
 WHERE EXISTS(
-	SELECT pre_user_id
+	SELECT mail
 	FROM pre_users
-	WHERE pre_user_id = @pre_user_id
+	WHERE mail = @mail
 );
 
-INSERT INTO pre_users(pre_user_id, token)
-SELECT @pre_user_id, @token
+INSERT INTO pre_users(mail, token)
+SELECT @mail, @token
 WHERE @is_exist <> 0;
 
 UPDATE pre_users

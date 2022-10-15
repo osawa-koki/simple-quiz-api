@@ -139,7 +139,7 @@ internal static class Auth
 	/// 	}
 	///
 	/// </remarks>
-	/// <param name="preSignUpStruct"></param>
+	/// <param name="mail"></param>
 	/// <response code="200">正常に仮会員登録処理が完了しました。</response>
 	/// <response code="400">不正なメールアドレスが指定されました。</response>
 	/// <response code="500">会員登録処理中に例外が発生しました。</response>
