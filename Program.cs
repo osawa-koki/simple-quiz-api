@@ -18,30 +18,30 @@ const string CORS_RULE_NAME = "simple-quiz";
 
 var builder = WebApplication.CreateBuilder(args);
 
-var securityScheme = new OpenApiSecurityScheme()
-{
-    Name = "Authorization",
-    Type = SecuritySchemeType.ApiKey,
-    Scheme = "Bearer",
-    BearerFormat = "OAuth",
-    In = ParameterLocation.Header,
-    Description = "JSON Web Token based security",
-};
+// var securityScheme = new OpenApiSecurityScheme()
+// {
+//     Name = "Authorization",
+//     Type = SecuritySchemeType.ApiKey,
+//     Scheme = "Bearer",
+//     BearerFormat = "OAuth",
+//     In = ParameterLocation.Header,
+//     Description = "JSON Web Token based security",
+// };
 
-var securityReq = new OpenApiSecurityRequirement()
-{
-    {
-        new OpenApiSecurityScheme
-        {
-            Reference = new OpenApiReference
-            {
-                Type = ReferenceType.SecurityScheme,
-                Id = "Bearer"
-            }
-        },
-        new string[] {}
-    }
-};
+// var securityReq = new OpenApiSecurityRequirement()
+// {
+//     {
+//         new OpenApiSecurityScheme
+//         {
+//             Reference = new OpenApiReference
+//             {
+//                 Type = ReferenceType.SecurityScheme,
+//                 Id = "Bearer"
+//             }
+//         },
+//         new string[] {}
+//     }
+// };
 
 
 
@@ -75,22 +75,22 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1",
         Title = "simple-quiz API",
         Description = "API for simple-quiz",
-        TermsOfService = new Uri($"{Env.DOMAIN}/terms"),
+        TermsOfService = new Uri($"https://{Env.DOMAIN}/terms"),
         Contact = new OpenApiContact
         {
             Name = "Example Contact",
-            Url = new Uri($"{Env.DOMAIN}/contact")
+            Url = new Uri($"https://{Env.DOMAIN}/contact")
         },
         License = new OpenApiLicense
         {
             Name = "Example License",
-            Url = new Uri($"{Env.DOMAIN}/license")
+            Url = new Uri($"https://{Env.DOMAIN}/license")
         }
     });
     var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-    options.AddSecurityDefinition("Bearer", securityScheme);
-    options.AddSecurityRequirement(securityReq);
+    // options.AddSecurityDefinition("Bearer", securityScheme);
+    // options.AddSecurityRequirement(securityReq);
 });
 
 // Cookieの設定
