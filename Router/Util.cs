@@ -1,5 +1,5 @@
 using System.Security.Cryptography;
-
+using System.Text;
 
 internal static class Util
 {
@@ -8,9 +8,12 @@ internal static class Util
 		return new Uri(new Uri(a), b).AbsolutePath;
 	}
 
-	internal static string? HashPassword(string target)
+
+	private static SHA256 sha256 = SHA256.Create();
+	internal static string Hasher_sha256(string target)
 	{
-		return SHA512.Create(target)?.ToString();
+		var hashed = sha256.ComputeHash(Encoding.UTF8.GetBytes(target));
+		return BitConverter.ToString(hashed).Replace("-", "");
 	}
 
 

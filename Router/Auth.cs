@@ -275,7 +275,7 @@ internal static class Auth
 
 
 			// 本登録処理
-			string? hashed_password = Util.HashPassword($"@{password}@");
+			string? hashed_password = Util.Hasher_sha256($"@{password}@");
 			if (hashed_password == null) return Results.Problem("ハッシュ生成に失敗しました。");
 
 			client.Add("INSERT INTO users(user_id, pw, user_name, comment)");
@@ -393,7 +393,7 @@ internal static class Auth
 			}
 
 			// 認証チェック
-			var hashed_password = Util.HashPassword($"@{password}@");
+			var hashed_password = Util.Hasher_sha256($"@{password}@");
 			if (hashed_password == null) return Results.Problem();
 
 			DBClient client = new();
