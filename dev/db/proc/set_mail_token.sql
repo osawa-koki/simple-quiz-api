@@ -17,7 +17,7 @@ WHERE EXISTS(
 
 INSERT INTO pre_users(mail, token)
 SELECT @mail, @token
-WHERE @is_exist <> 0;
+WHERE @is_exist = 0;
 
 UPDATE pre_users
 SET token = @token, updt = CURRENT_TIMESTAMP
