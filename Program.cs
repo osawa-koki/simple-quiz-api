@@ -138,6 +138,7 @@ app.MapPost("/auth/pre_signup/{mail}", Auth.PreSignUp);
 app.MapPost("/auth/signup", Auth.SignUp);
 app.MapDelete("/auth/signout", Auth.SignOut);
 app.MapPost("/auth/signin", Auth.SignIn);
+app.MapGet("/auth/caniuse", Auth.CanIUse);
 
 
 // ==============================

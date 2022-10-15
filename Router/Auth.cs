@@ -421,5 +421,60 @@ internal static class Auth
 
 
 
+    /// <summary>
+    /// ユーザID使用判定
+    /// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	
+	/// 	Get /auth/caniuse/hogehoge
+	/// 	
+	/// </remarks>
+    /// <returns>
+	/// {
+	/// 	"caniuse": true
+	/// }
+    /// </returns>
+	/// <response code="200">正常に結果が取得できました。</response>
+	/// <response code="400">指定したパラメタが不正です。</response>
+	/// <response code="500">予期せぬ例外が発生しました。</response>
+    [HttpGet]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	internal static dynamic CanIUse(string user_id)
+	{
+		try
+		{
+			if (!Regex.IsMatch(user_id, @"^[a-zA-Z0-9_\-]+$"))
+			{
+				return Results.BadRequest(new {message = "ユーザ名は半角英数字と「_(アンダースコア)」「-(ハイフン)」のみで構成して下さい。"});
+			}
+			
+			if (user_id.Length < 3 || 16 < user_id.Length)
+			{
+				return Results.BadRequest(new {message = "ユーザIDは3文字以上、16文字以内で指定してください。"});
+			}
+			
+			DBClient client = new();
+
+			client.Add("SELECT user_id");
+			client.Add("FROM users");
+			client.Add("WHERE user_id = @user_id;");
+			client.AddParam(user_id);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
+
+			bool usable = client.Select() == null;
+
+			return Results.Ok(new {caniuse = usable});
+
+		}
+		catch (Exception ex)
+		{
+			return Results.Problem($"{ex}");
+		}
+	}
+
+
 }
 
