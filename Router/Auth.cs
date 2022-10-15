@@ -122,7 +122,7 @@ internal static class Auth
 
 
     /// <summary>
-    /// 指定したメールアドレスを対象に仮会員登録処理を行います。
+    /// 【完成】指定したメールアドレスを対象に仮会員登録処理を行います。
     /// </summary>
 	/// <remarks>
 	/// Sample request:
