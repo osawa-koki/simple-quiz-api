@@ -21,7 +21,7 @@ WHERE @is_exist <> 0;
 
 UPDATE pre_users
 SET token = @token, updt = CURRENT_TIMESTAMP
-WHERE @is_exist = 1;
+WHERE mail = @mail AND @is_exist = 1;
 
 
 END
