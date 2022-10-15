@@ -212,7 +212,7 @@ internal static class Auth
 
 
     /// <summary>
-    /// 本登録処理を実行します。
+    /// 【完成】本登録処理を実行します。
     /// </summary>
 	/// <remarks>
 	/// Sample request:
