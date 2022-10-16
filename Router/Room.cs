@@ -277,6 +277,17 @@ internal static class Room
 
 			client.Execute();
 
+			client.Add("INSERT INTO room_owners(room_id, user_id, session_id)");
+			client.Add("VALUES(@room_id, @user_id, @session_id);");
+			client.AddParam(room_id);
+			client.AddParam(user_id != null ? user_id : DBNull.Value);
+			client.AddParam(session_id);
+			client.SetDataType("@room_id", SqlDbType.VarChar);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
+
+			client.Execute();
+
 			return Results.Created($"https://{Env.DOMAIN}/room?room_id={room_id}", null);
 
 		}
