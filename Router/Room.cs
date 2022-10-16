@@ -57,16 +57,8 @@ internal static class Room
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Detail(string room_id, HttpContext context)
+	internal static IResult Detail(string room_id, [FromHeader(Name = "Authorization")] string session_id)
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id_raw;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
-		string session_id = session_id_raw.ToString();
-		if (!auth_filled || session_id == "")
-		{
-			return Results.BadRequest(new { message = "認証トークンが不在です。"});
-		}
-
 		DBClient client = new();
 
 		try
@@ -135,7 +127,7 @@ internal static class Room
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult List(int since, int per_page, HttpContext context)
+	internal static IResult List(int since, int per_page, [FromHeader(Name = "Authorization")] string session_id)
 	{
 		if (since < 0 || per_page < 0)
 		{
@@ -144,14 +136,6 @@ internal static class Room
 		if (30 < per_page)
 		{
 			return Results.BadRequest("一度に取得できるルーム数は30までです。");
-		}
-
-		Microsoft.Extensions.Primitives.StringValues session_id_raw;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
-		string session_id = session_id_raw.ToString();
-		if (!auth_filled || session_id == "")
-		{
-			return Results.BadRequest(new { message = "認証トークンが不在です。"});
 		}
 
 		DBClient client = new();
