@@ -479,16 +479,8 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Delete(int template_id, HttpContext context)
+	internal static IResult Delete(string template_id, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id_raw;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
-		string session_id = session_id_raw.ToString();
-		if (!auth_filled || session_id == "")
-		{
-			return Results.BadRequest(new { message = "認証トークンが不在です。"});
-		}
-
 		DBClient client = new();
 
 		try
@@ -507,18 +499,12 @@ internal static class Template
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			var result = client.Select();
 
-			if (result == null)
-			{
-				return Results.NotFound(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
-			}
+			if (result == null) return Results.NotFound(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
 
 			var owning_user = result["owning_user"]?.ToString();
 			var owning_session = result["owning_session"]?.ToString();
 
-			if (user_id != owning_user && session_id != owning_session)
-			{
-				return Results.Forbid();
-			}
+			if (user_id != owning_user && session_id != owning_session) Results.StatusCode(403);
 
 			client.Add("DELETE FROM quiz_templates");
 			client.Add("FROM quiz_templates");
