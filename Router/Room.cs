@@ -345,7 +345,7 @@ internal static class Room
 	{
 		string room_id = roomUpdateStruct.room_id;
 		if (!Regex.IsMatch(room_id, @"^[a-zA-Z0-9]+$")) return Results.BadRequest(new {message = "ルームIDに不正な文字が含まれています。"});
-		if (room_id.Length != 32) return Results.BadRequest(new {message = "ルームIDも文字数が不正です。"});
+		if (room_id.Length != 32) return Results.BadRequest(new {message = "ルームIDの文字数が不正です。"});
 
 		string room_name = roomUpdateStruct.room_name;
 		if (room_name.Length < 3 || 30 < room_name.Length) return Results.BadRequest(new {message = "ルーム名は3文字以上、30文字以内で入力してください。"});
