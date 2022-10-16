@@ -16,6 +16,13 @@ public record TemplateSummaryStruct(
 );
 
 
+public record TemplateContentStruct(
+	string content,
+	bool is_public,
+	List<string> keywords
+);
+
+
 
 internal static class Template
 {
@@ -254,8 +261,8 @@ internal static class Template
 	/// 	
 	/// 	POST /template
 	/// 	{
-	/// 		"is_public": true,
 	/// 		"content": "世界で${number}番目に高い山は???",
+	/// 		"is_public": true,
 	/// 		"keywords": ["ランキング", "山", "教養", "地理"]
 	/// 	}
 	/// 	
@@ -270,17 +277,9 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Create(TemplateSummaryStruct templateSummaryStruct, HttpContext context)
+	internal static IResult Create(TemplateContentStruct templateContentStruct, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id_raw;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
-		string session_id = session_id_raw.ToString();
-		if (!auth_filled || session_id == "")
-		{
-			return Results.BadRequest(new { message = "認証トークンが不在です。"});
-		}
-
-		if (10 < templateStruct.keywords.Count)
+		if (10 < templateContentStruct.keywords.Count)
 		{
 			return Results.BadRequest(new { message = "登録できるキーワードは10個までです。"});
 		}
@@ -301,8 +300,8 @@ internal static class Template
 			client.Add("VALUES(@owning_user, @owning_session, @is_public, @content)");
 			client.AddParam(user_id != null ? user_id : DBNull.Value);
 			client.AddParam(session_id);
-			client.AddParam(templateStruct.is_public ? 1 : 0);
-			client.AddParam(templateStruct.content);
+			client.AddParam(templateContentStruct.is_public ? 1 : 0);
+			client.AddParam(templateContentStruct.content);
 			client.SetDataType("@", SqlDbType.VarChar);
 			client.SetDataType("@", SqlDbType.VarChar);
 			client.SetDataType("@", SqlDbType.Bit);
@@ -328,7 +327,7 @@ internal static class Template
 			client.Add("INSERT INTO quiz_template_keywords(quiztemplate_id, keyword)");
 			client.Add("VALUES");
 			List<string> keywords = new();
-			foreach (var keyword in templateStruct.keywords)
+			foreach (var keyword in templateContentStruct.keywords)
 			{
 				keywords.Add($"({created_id}, {keyword})");
 			}
