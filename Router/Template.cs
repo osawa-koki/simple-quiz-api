@@ -217,8 +217,10 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Search(string search_by, int per_page, HttpContext context)
+	internal static IResult Search(string search_by, int per_page, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
+		if (session_id == "") return Results.BadRequest(new {message = "セッションIDを指定してください。"});
+
 		if (per_page < 0)
 		{
 			return Results.BadRequest("正の値を入力してください。");
@@ -226,14 +228,6 @@ internal static class Template
 		if (30 < per_page)
 		{
 			return Results.BadRequest("一度に取得できるテンプレート数は30までです。");
-		}
-
-		Microsoft.Extensions.Primitives.StringValues session_id_raw;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
-		string session_id = session_id_raw.ToString();
-		if (!auth_filled || session_id == "")
-		{
-			return Results.BadRequest(new { message = "認証トークンが不在です。"});
 		}
 
 		DBClient client = new();
@@ -247,16 +241,38 @@ internal static class Template
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			var user_id = client.Select()?["user_id"]?.ToString();
 
-			client.Add($"SELECT TOP {per_page} k.quiztemplate_id, t.is_public, t.content, u.user_name, u.user_icon"); // SQLインジェクション攻撃対策は不要
-			client.Add("FROM quiz_template_keywords k");
-			client.Add("INNER JOIN quiz_templates t ON k.quiztemplate_id = t.quiztemplate_id");
-			client.Add("INNER JOIN users u ON t.owning_user = u.user_id");
+			client.Add($"SELECT TOP {per_page} t.quiztemplate_id, t.is_public, t.content, t.n_of_used, t.n_of_liked, t.n_of_disliked, t.rgdt, t.updt, u.user_name, u.user_icon");
+			client.Add("FROM quiz_templates t");
+			client.Add("LEFT JOIN quiz_template_keywords k ON t.quiztemplate_id = k.quiztemplate_id AND k.keyword = @keyword");
+			client.Add("LEFT JOIN users u ON t.owning_user = u.user_id");
 			client.Add("WHERE is_public = 1 OR owning_user = @user_id OR owning_session = @session_id");
-			client.Add("ORDER BY t.quiztemplate_id ASC;");
+			client.Add("ORDER BY (t.n_of_liked - t.n_of_disliked) * 3 + t.n_of_used DESC");
+			client.AddParam(search_by);
 			client.AddParam(user_id ?? ""); // ログインしていなければ、存在しないIDを指定する。 -> user_id未指定と同じ
-			client.AddParam(auth_filled);
+			client.AddParam(session_id);
+			client.SetDataType("@keyword", SqlDbType.VarChar);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
+
 			var templates = client.SelectAll();
-			return Results.Ok(templates);
+
+			List<TemplateSummaryStruct> templateSummaryStructs = new();
+			foreach (var template in templates)
+			{
+				TemplateSummaryStruct templateSummaryStruct = new(
+					(string)template["quiztemplate_id"],
+					(string)template["content"],
+					(bool)template["is_public"],
+					(int)template["n_of_used"],
+					(int)template["n_of_liked"],
+					(int)template["n_of_disliked"],
+					(DateTime)template["rgdt"],
+					(DateTime)template["updt"]
+				);
+				templateSummaryStructs.Add(templateSummaryStruct);
+			}
+
+			return Results.Ok(templateSummaryStructs);
 
 		}
 		catch (Exception ex)
