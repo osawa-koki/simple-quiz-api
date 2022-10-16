@@ -100,7 +100,7 @@ internal static class Room
 			client.Add("FROM rooms r");
 			client.Add("LEFT JOIN room_owners ow ON r.room_id = ow.room_id");
 			client.Add("LEFT JOIN users u ON ow.user_id = u.user_id");
-			client.Add("WHERE room_id = @room_id;");
+			client.Add("WHERE r.room_id = @room_id;");
 			client.AddParam(room_id);
 			client.SetDataType("@room_id", SqlDbType.VarChar);
 
