@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Authorization;
 public record SignUpStruct(string token, string user_id, string password, string user_name, string comment);
 public record SignInStruct(string uid, string password);
 
+public record PreSignUpStruct(string mail);
+
 internal static class Auth
 {
 
@@ -139,7 +141,7 @@ internal static class Auth
 	/// 	}
 	///
 	/// </remarks>
-	/// <param name="mail"></param>
+	/// <param name="preSignUpStruct"></param>
 	/// <response code="200">正常に仮会員登録処理が完了しました。</response>
 	/// <response code="400">不正なメールアドレスが指定されました。</response>
 	/// <response code="500">会員登録処理中に例外が発生しました。</response>
@@ -149,8 +151,9 @@ internal static class Auth
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult PreSignUp(string mail)
+	internal static IResult PreSignUp(PreSignUpStruct preSignUpStruct)
 	{
+		var mail = preSignUpStruct.mail;
 		try
 		{
 			// メールアドレスのチェック
