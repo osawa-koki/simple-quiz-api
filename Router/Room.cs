@@ -96,7 +96,7 @@ internal static class Room
 			var user_id = client.Select()?["user_id"]?.ToString() ?? "";
 
 
-			client.Add("SELECT r.room_id, r.room_name, r.room_icon, r.explanation, r.rgdt, r.updt, u.user_name, u.user_icon, ow.user_id, ow.session_id");
+			client.Add("SELECT r.room_id, r.room_name, r.room_icon, r.explanation, r.is_valid, r.rgdt, r.updt, u.user_name, u.user_icon, ow.user_id, ow.session_id");
 			client.Add("FROM rooms r");
 			client.Add("LEFT JOIN room_owners ow ON r.room_id = ow.room_id");
 			client.Add("LEFT JOIN users u ON ow.user_id = u.user_id");
@@ -107,8 +107,8 @@ internal static class Room
 			var room = client.Select();
 
 			if (room == null) return Results.NotFound(new {message = "指定したルームは存在しません。"});
-			if (int.Parse(room["is_valid"]?.ToString() ?? "-1") != 1) return Results.BadRequest(new {message = "指定したルームは既に終了しています。"});
-			if (room["user_id"]?.ToString() != user_id && room["session_id"]?.ToString() != session_id) return Results.Forbid();
+			if (!(bool)room["is_valid"]) return Results.BadRequest(new {message = "指定したルームは既に終了しています。"});
+			if (room["user_id"]?.ToString() != user_id && room["session_id"]?.ToString() != session_id) return Results.StatusCode(403);
 
 
 			client.Add("SELECT u.user_id, u.user_name, u.comment, u.user_icon");
