@@ -65,6 +65,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Detail(string quiztemplate_id, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
+		if (session_id == "") return Results.BadRequest(new {message = "セッションIDを指定してください。"});
 		DBClient client = new();
 
 		try
@@ -143,6 +144,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult List(int since = 0, int per_page = 30, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
+		if (session_id == "") return Results.BadRequest(new {message = "セッションIDを指定してください。"});
 		if (since < 0 || per_page < 0) return Results.BadRequest("正の値を入力してください。");
 		if (30 < per_page) return Results.BadRequest("一度に取得できるテンプレート数は30までです。");
 
@@ -290,6 +292,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Create(TemplateContentStruct templateContentStruct, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
+		if (session_id == "") return Results.BadRequest(new {message = "セッションIDを指定してください。"});
 		if (10 < templateContentStruct.keywords.Count)
 		{
 			return Results.BadRequest(new { message = "登録できるキーワードは10個までです。"});
@@ -375,6 +378,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Update(string quiztemplate_id, TemplateContentStruct templateContentStruct, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
+		if (session_id == "") return Results.BadRequest(new {message = "セッションIDを指定してください。"});
 		DBClient client = new();
 
 		try
@@ -471,6 +475,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult Delete(string quiztemplate_id, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
+		if (session_id == "") return Results.BadRequest(new {message = "セッションIDを指定してください。"});
 		DBClient client = new();
 
 		try
