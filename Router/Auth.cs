@@ -240,7 +240,7 @@ internal static class Auth
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult SignUp(SignUpStruct signUpStruct)
+	internal static IResult SignUp(SignUpStruct signUpStruct, [FromHeader(Name = "Authorization")] string session_id)
 	{
 		string token = signUpStruct.token;
 		string user_id = signUpStruct.user_id;
@@ -297,10 +297,19 @@ internal static class Auth
 			client.SetDataType("@comment", SqlDbType.VarChar);
 			client.Execute();
 			
+			// 仮会員登録テーブルから削除
 			client.Add("DELETE FROM pre_users");
 			client.Add("WHERE token = @token");
 			client.AddParam(token);
 			client.SetDataType("@token", SqlDbType.VarChar);
+			client.Execute();
+
+			// 現行のセッションと紐づけ
+			client.Add("UPDATE sessions");
+			client.Add("SET user_id = @user_id");
+			client.Add("WHERE session_id = @session_id;");
+			client.AddParam(user_id);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
 			client.Execute();
 
 			return Results.Ok(new {});
