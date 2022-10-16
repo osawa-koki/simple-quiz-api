@@ -22,6 +22,20 @@ public record RoomUpdateStruct(
 );
 
 
+
+public record RoomSummaryStruct(
+	string room_id,
+	string room_name,
+	string room_icon,
+	string explanation,
+	bool is_public,
+	DateTime rgdt,
+	DateTime updt,
+	string user_name,
+	string user_icon
+);
+
+
 internal static class Room
 {
 
