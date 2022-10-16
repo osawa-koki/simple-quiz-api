@@ -308,9 +308,8 @@ internal static class Room
 	/// <remarks>
 	/// Sample request:
 	/// 	
-	/// 	POST /room
+	/// 	POST /room/c49f09f140d693ddf2a33491a82efba8
 	/// 	{
-	/// 		"room_id": "c49f09f140d693ddf2a33491a82efba8",
 	/// 		"room_name": "ITクイズ大会♪",
 	/// 		"room_icon": "491a82efba8c49f09f140d693ddf2a33.png"
 	/// 		"explanation": "ITに関する簡単なクイズ大会で～す♪"
@@ -396,7 +395,7 @@ internal static class Room
 			client.AddParam(explanation != null ? explanation : DBNull.Value);
 			client.AddParam(password != null ? password : DBNull.Value);
 			client.AddParam(is_public ? 1 : 0);
-			client.AddParam(roomUpdateStruct.room_id);
+			client.AddParam(room_id);
 			client.SetDataType("@room_name", SqlDbType.VarChar);
 			client.SetDataType("@room_icon", SqlDbType.VarChar);
 			client.SetDataType("@explanation", SqlDbType.VarChar);
