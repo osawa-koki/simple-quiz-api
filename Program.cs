@@ -25,7 +25,7 @@ var securityScheme = new OpenApiSecurityScheme()
     Scheme = "Bearer",
     BearerFormat = "OAuth",
     In = ParameterLocation.Header,
-    Description = "JSON Web Token based security",
+    Description = "PAT based token",
 };
 
 var securityReq = new OpenApiSecurityRequirement()
@@ -134,7 +134,7 @@ app.MapControllers();
 
 app.MapGet("/auth/session_id", Auth.GenerateToken);
 app.MapGet("/auth/is_signin", Auth.IsLogin);
-app.MapPost("/auth/pre_signup/{mail}", Auth.PreSignUp);
+app.MapPost("/auth/pre_signup", Auth.PreSignUp);
 app.MapPost("/auth/signup", Auth.SignUp);
 app.MapDelete("/auth/signout", Auth.SignOut);
 app.MapPost("/auth/signin", Auth.SignIn);
@@ -145,12 +145,12 @@ app.MapGet("/auth/caniuse", Auth.CanIUse);
 // =====     テンプレート     =====
 // ==============================
 
-app.MapGet("/template/{template_id}", Template.Detail);
-app.MapGet("/template/list", Template.List);
-app.MapGet("/template/search", Template.Search);
-app.MapPost("/template", Template.Create);
-app.MapPut("/template/{template_id}", Template.Update);
-app.MapDelete("/template/{template_id}", Template.Delete);
+// app.MapGet("/template/{template_id}", Template.Detail);
+// app.MapGet("/template/list", Template.List);
+// app.MapGet("/template/search", Template.Search);
+// app.MapPost("/template", Template.Create);
+// app.MapPut("/template/{template_id}", Template.Update);
+// app.MapDelete("/template/{template_id}", Template.Delete);
 
 
 // ==============================
