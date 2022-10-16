@@ -157,6 +157,8 @@ internal static class Template
 			client.Add($"FETCH NEXT {per_page} ROWS ONLY;"); // SQLインジェクション攻撃対策は不要
 			client.AddParam(user_id ?? ""); // ログインしていなければ、存在しないIDを指定する。 -> user_id未指定と同じ
 			client.AddParam(session_id);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
 			var templates = client.SelectAll();
 
 			List<TemplateSummaryStruct> templateSummaryStructs = new();
@@ -295,33 +297,22 @@ internal static class Template
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			var user_id = client.Select()?["user_id"]?.ToString();
 
+			string quiztemplate_id = Guid.NewGuid().ToString("N");
+
 			// テンプレートの登録
-			client.Add("INSERT INTO quiz_templates(owning_user, owning_session, is_public, content)");
-			client.Add("VALUES(@owning_user, @owning_session, @is_public, @content)");
+			client.Add("INSERT INTO quiz_templates(quiztemplate_id, owning_user, owning_session, content, is_public)");
+			client.Add("VALUES(@quiztemplate_id, @owning_user, @owning_session, @content, @is_public)");
+			client.Add(quiztemplate_id);
 			client.AddParam(user_id != null ? user_id : DBNull.Value);
 			client.AddParam(session_id);
-			client.AddParam(templateContentStruct.is_public ? 1 : 0);
 			client.AddParam(templateContentStruct.content);
-			client.SetDataType("@", SqlDbType.VarChar);
-			client.SetDataType("@", SqlDbType.VarChar);
-			client.SetDataType("@", SqlDbType.Bit);
-			client.SetDataType("@", SqlDbType.VarChar);
-			client.Execute();
-
-			// 登録したIDを取得
-			client.Add("SELECT TOP 1 quiztemplate_id");
-			client.Add("FROM quiz_templates");
-			client.Add("WHERE owning_session = @owning_session");
-			client.Add("ORDER BY quiztemplate_id DESC;");
-			client.AddParam(session_id);
+			client.AddParam(templateContentStruct.is_public);
+			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
+			client.SetDataType("@owning_user", SqlDbType.VarChar);
 			client.SetDataType("@owning_session", SqlDbType.VarChar);
-			var created_id = int.Parse(client.Select()?["quiztemplate_id"]?.ToString() ?? "-1");
-
-			if (created_id == -1)
-			{
-				return Results.Problem();
-			}
-
+			client.SetDataType("@content", SqlDbType.VarChar);
+			client.SetDataType("@is_public", SqlDbType.Bit);
+			client.Execute();
 
 			// テンプレートキーワードの登録
 			client.Add("INSERT INTO quiz_template_keywords(quiztemplate_id, keyword)");
@@ -329,7 +320,7 @@ internal static class Template
 			List<string> keywords = new();
 			foreach (var keyword in templateContentStruct.keywords)
 			{
-				keywords.Add($"({created_id}, {keyword})");
+				keywords.Add($"('{quiztemplate_id.Replace("'", "''")}', '{keyword.Replace("'", "''")}')");
 			}
 			client.Add(string.Join(",", keywords) + ";");
 			client.Execute();
