@@ -4,19 +4,16 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 
 
-/// <summary>
-/// テンプレート構造体
-/// </summary>
-internal struct TemplateStruct
-{
-	internal int? quiztemplate_id;
-	internal bool is_public;
-	internal string content;
-	internal string? transfer_to;
-	internal List<string> keywords;
-	internal DateTime? rgdt;
-	internal DateTime? updt;
-}
+public record TemplateSummaryStruct(
+	int quiztemplate_id,
+	bool is_public,
+	string content,
+	int n_of_used,
+	int n_of_liked,
+	int n_of_disliked,
+	DateTime rgdt,
+	DateTime updt
+);
 
 
 
@@ -46,20 +43,8 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Detail(int template_id, HttpContext context)
+	internal static IResult Detail(int template_id, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
-		if (template_id < 0)
-		{
-			return Results.BadRequest(new {message = "テンプレートIDには正の整数を指定してください。"});
-		}
-
-		Microsoft.Extensions.Primitives.StringValues session_id_raw;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
-		string session_id = session_id_raw.ToString();
-		if (!auth_filled || session_id == "")
-		{
-			return Results.BadRequest(new { message = "認証トークンが不在です。"});
-		}
 
 		DBClient client = new();
 
