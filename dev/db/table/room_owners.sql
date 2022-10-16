@@ -1,5 +1,5 @@
 
-CREATE TABLE room_owners(
+CREATE TABLE room_admins(
 	room_id VARCHAR(32),
 	user_id VARCHAR(16),
 	session_id VARCHAR(32),
