@@ -140,7 +140,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult List(int since, int per_page, [FromHeader(Name = "Authorization")] string session_id = "")
+	internal static IResult List(int since = 0, int per_page = 30, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
 		if (since < 0 || per_page < 0) return Results.BadRequest("正の値を入力してください。");
 		if (30 < per_page) return Results.BadRequest("一度に取得できるテンプレート数は30までです。");
@@ -188,7 +188,7 @@ internal static class Template
 			return Results.Ok(templateSummaryStructs);
 
 		}
-		catch
+		catch ()
 		{
 			return Results.Problem();
 		}
