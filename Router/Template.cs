@@ -156,7 +156,7 @@ internal static class Template
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			var user_id = client.Select()?["user_id"]?.ToString();
 
-			client.Add("SELECT t.quiztemplate_id, t.is_public, t.content, t.n_of_used, , t.n_of_liked, t.n_of_disliked, u.user_name, u.user_icon");
+			client.Add("SELECT t.quiztemplate_id, t.is_public, t.content, t.n_of_used, t.n_of_liked, t.n_of_disliked, t.rgdt, t.updt, u.user_name, u.user_icon");
 			client.Add("FROM quiz_templates t");
 			client.Add("INNER JOIN users u ON t.owning_user = u.user_id");
 			client.Add("WHERE is_public = 1 OR owning_user = @user_id OR owning_session = @session_id");
@@ -173,7 +173,7 @@ internal static class Template
 			foreach (var template in templates)
 			{
 				TemplateSummaryStruct templateSummaryStruct = new(
-					(string)template["template_id"],
+					(string)template["quiztemplate_id"],
 					(string)template["content"],
 					(bool)template["is_public"],
 					(int)template["n_of_used"],
