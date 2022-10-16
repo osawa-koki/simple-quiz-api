@@ -3,7 +3,7 @@ using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 
-
+#pragma warning disable
 public record TemplateSummaryStruct(
 	string quiztemplate_id,
 	string content,
@@ -14,7 +14,6 @@ public record TemplateSummaryStruct(
 	DateTime rgdt,
 	DateTime updt
 );
-
 
 public record TemplateDetailStruct(
 	string quiztemplate_id,
@@ -28,6 +27,7 @@ public record TemplateDetailStruct(
 	List<string> keywords
 );
 
+#pragma warning restore
 
 public record TemplateContentStruct(
 	string content,
