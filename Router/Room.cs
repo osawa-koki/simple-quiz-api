@@ -163,14 +163,15 @@ internal static class Room
 			client.Add("WHERE session_id = @session_id;");
 			client.AddParam(session_id);
 			client.SetDataType("@session_id", SqlDbType.VarChar);
-			var user_id = client.Select()?["user_id"]?.ToString() ?? "";
+			string user_id = client.Select()?["user_id"]?.ToString() ?? "";
 
 
-			client.Add("SELECT r.room_id, r.room_name, r.room_icon, r.explanation, r.rgdt, r.updt, u.user_name, u.user_icon");
+			client.Add("SELECT r.room_id, r.room_name, r.room_icon, r.explanation, r.is_public, r.rgdt, r.updt, u.user_name, u.user_icon");
 			client.Add("FROM rooms r");
 			client.Add("LEFT JOIN room_owners ow ON r.room_id = ow.room_id");
 			client.Add("LEFT JOIN users u ON ow.user_id = u.user_id");
-			client.Add("WHERE is_valid = 1 AND (r.is_public = 1 OR ow.user_id = @user_id OR ow.session_id = @session_id);");
+			client.Add("WHERE is_valid = 1 AND (r.is_public = 1 OR ow.user_id = @user_id OR ow.session_id = @session_id)");
+			client.Add("ORDER BY updt DESC;");
 			client.AddParam(user_id);
 			client.AddParam(session_id);
 			client.SetDataType("@user_id", SqlDbType.VarChar);
