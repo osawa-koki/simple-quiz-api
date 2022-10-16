@@ -108,7 +108,7 @@ internal static class Auth
 				return Results.BadRequest(new { message = "指定した認証トークンに不備があります。"});
 			}
 
-			if (result["user_id"] != DBNull.Value)
+			if (result["user_id"]?.ToString() != null)
 			{
 				return Results.Ok(new {is_login = true, user_id = result["user_id"]?.ToString()});
 			}
