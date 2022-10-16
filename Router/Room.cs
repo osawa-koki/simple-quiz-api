@@ -319,20 +319,24 @@ internal static class Room
 
 			string room_id = Guid.NewGuid().ToString("N");
 
-			client.Add("INSERT INTO rooms(room_id, room_name, room_icon, explanation, pw, is_public)");
-			client.Add("VALUES(@room_id, @room_name, @room_icon, @explanation, @pw, @is_public);");
+			client.Add("INSERT INTO rooms(room_id, room_name, room_icon, explanation, pw, is_public, owning_user, owning_session)");
+			client.Add("VALUES(@room_id, @room_name, @room_icon, @explanation, @pw, @is_public, @owning_user, @owning_session);");
 			client.AddParam(room_id);
 			client.AddParam(room_name);
 			client.AddParam(room_icon != null ? room_icon : DBNull.Value);
 			client.AddParam(explanation != null ? explanation : DBNull.Value);
 			client.AddParam(password != null ? password : DBNull.Value);
-			client.AddParam(is_public ? 1 : 0);
+			client.AddParam(is_public);
+			client.AddParam(user_id != null ? user_id : DBNull.Value);
+			client.AddParam(session_id);
 			client.SetDataType("@room_id", SqlDbType.VarChar);
 			client.SetDataType("@room_name", SqlDbType.NVarChar);
 			client.SetDataType("@room_icon", SqlDbType.VarChar);
 			client.SetDataType("@explanation", SqlDbType.NVarChar);
 			client.SetDataType("@pw", SqlDbType.VarChar);
 			client.SetDataType("@is_public", SqlDbType.Bit);
+			client.SetDataType("@owning_user", SqlDbType.VarChar);
+			client.SetDataType("@owning_session", SqlDbType.VarChar);
 
 			client.Execute();
 
