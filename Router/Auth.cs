@@ -363,11 +363,13 @@ internal static class Auth
 	/// {}
     /// </returns>
 	/// <response code="200">正常にサインイン処理が実行されました。</response>
-	/// <response code="400">認証に失敗しました。</response>
+	/// <response code="400">指定したパラメタに不備があります。</response>
+	/// <response code="401">認証に失敗しました。</response>
 	/// <response code="500">予期せぬ例外が発生しました。</response>
     [HttpPost]
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status401Unauthorized)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static dynamic SignIn(SignInStruct signInStruct, [FromHeader(Name = "Authorization")] string session_id)
 	{
@@ -378,7 +380,7 @@ internal static class Auth
 
 
 			// メールアドレスのチェック
-			if (!Regex.IsMatch(uid, @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$") && !(uid.Length < 3 || 16 < uid.Length))
+			if (!Regex.IsMatch(uid, @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$") && (uid.Length < 3 || 16 < uid.Length))
 			{
 				return Results.BadRequest(new { message = "メールアドレス、またはユーザIDの形式が不正です。"});
 			}
@@ -401,17 +403,28 @@ internal static class Auth
 			client.Add("FROM users");
 			client.Add("WHERE (user_id = @uid OR mail = @uid) AND pw = @pw;");
 			client.AddParam(uid);
-			client.AddParam(uid);
 			client.AddParam(hashed_password);
-			client.SetDataType("@user_id", SqlDbType.VarChar);
-			client.SetDataType("@user_id", SqlDbType.VarChar);
+			client.SetDataType("@uid", SqlDbType.VarChar);
 			client.SetDataType("@pw", SqlDbType.VarChar);
 
-			if (client.Select() != null)
+			var user_id = client.Select()?["user_id"]?.ToString();
+
+			if (user_id == null)
 			{
-				return Results.Ok(new {});
+				return Results.Unauthorized();
 			}
-			return Results.BadRequest(new { message = "認証に失敗しました。"});
+
+			client.Add("UPDATE sessions");
+			client.Add("SET");
+			client.Add("	user_id = @user_id");
+			client.Add("WHERE session_id = @session_id;");
+			client.AddParam(user_id);
+			client.AddParam(session_id);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
+			client.Execute();
+
+			return Results.Ok(new {});
 		}
 		catch (Exception ex)
 		{
