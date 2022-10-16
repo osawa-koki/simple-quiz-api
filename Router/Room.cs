@@ -12,15 +12,14 @@ public record RoomCreateStruct(
 );
 
 
-internal struct RoomUpdateStruct
-{
-	internal string room_id;
-	internal string room_name;
-	internal string? room_icon;
-	internal string? explanation;
-	internal int? pw;
-	internal bool is_public;
-}
+public record RoomUpdateStruct(
+	string room_id,
+	string room_name,
+	string room_icon,
+	string explanation,
+	string password,
+	bool is_public
+);
 
 
 internal static class Room
@@ -201,7 +200,7 @@ internal static class Room
 	/// 		"room_name": "ITクイズ大会♪",
 	/// 		"room_icon": "491a82efba8c49f09f140d693ddf2a33.png"
 	/// 		"explanation": "ITに関する簡単なクイズ大会で～す♪"
-	/// 		"pw": null,
+	/// 		"password": null,
 	/// 		"is_public": true
 	/// 	}
 	/// 	
@@ -218,25 +217,18 @@ internal static class Room
 	[ProducesResponseType(StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Create(RoomCreateStruct roomCreateStruct, HttpContext context)
+	internal static IResult Create(RoomCreateStruct roomCreateStruct, [FromHeader(Name = "Authorization")] string session_id)
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id_raw;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
-		string session_id = session_id_raw.ToString();
-		if (!auth_filled || session_id == "")
-		{
-			return Results.BadRequest(new { message = "認証トークンが不在です。"});
-		}
-
+		// ルーム名
 		string room_name = roomCreateStruct.room_name;
 		if (room_name.Length < 3 || 30 < room_name.Length) return Results.BadRequest(new {message = "ルーム名は3文字以上、30文字以内で入力してください。"});
 
-
+		// ルームアイコン(事前に登録)
 		string? room_icon = roomCreateStruct.room_icon;
 		if (room_icon != null)
 		{
 			if (Regex.IsMatch(room_icon, @"\.{2,}")) return Results.BadRequest(new {message = "ディレクトリトラバーサル攻撃のおそれのある文字列が指定されています。"});
-			if (Regex.IsMatch(room_icon, @"[^a-zA-Z0-9\.]")) return Results.BadRequest(new {message = "不正な文字が画像ファイル名として使用されています。"});
+			if (!Regex.IsMatch(room_icon, @"^[a-zA-Z0-9\.]+$")) return Results.BadRequest(new {message = "不正な文字が画像ファイル名として使用されています。"});
 			if (room_icon.Length < 32 || 38 < room_icon.Length) return Results.BadRequest(new {message = "画像ファイル名の長さが正しくありません。"});
 		}
 
@@ -246,15 +238,14 @@ internal static class Room
 			if (100 < explanation.Length) return Results.BadRequest(new {message = "説明文は100文字以内で入力してください。"});
 		}
 
-
-		string? password = roomCreateStruct.password?.ToString();
+		string? password = roomCreateStruct.password;
 		if (password != null)
 		{
+			if (!Regex.IsMatch(password, @"^[0-9]+$")) return Results.BadRequest(new {message = "パスワードは数字のみで構成してください。"});
 			if (password.Length != 4) return Results.BadRequest(new {message = "パスワードは4文字で構成してください。"});
 		}
 
 		bool is_public = roomCreateStruct.is_public;
-
 
 		DBClient client = new();
 
@@ -354,7 +345,7 @@ internal static class Room
 		}
 
 
-		string? password = roomUpdateStruct.pw?.ToString();
+		string? password = roomUpdateStruct.password?.ToString();
 		if (password != null)
 		{
 			if (password.Length != 4) return Results.BadRequest(new {message = "パスワードは4文字で構成してください。"});
