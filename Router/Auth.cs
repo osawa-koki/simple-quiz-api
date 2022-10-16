@@ -77,7 +77,8 @@ internal static class Auth
 	/// </remarks>
     /// <returns>
 	/// 	{
-	/// 		"is_login": true
+	/// 		"is_login": true,
+	/// 		"user_id": "hogehoge"
 	/// 	}
 	/// </returns>
 	/// <response code="200">正常にログイン中かどうかを判定できました。</response>
@@ -109,11 +110,11 @@ internal static class Auth
 
 			if (result["user_id"] != DBNull.Value)
 			{
-				return Results.Ok(new {is_login = true});
+				return Results.Ok(new {is_login = true, user_id = result["user_id"]?.ToString()});
 			}
 			else
 			{
-				return Results.Ok(new {is_login = false});
+				return Results.Ok(new {is_login = false, user_id = ""});
 			}
 		}
 		catch (Exception ex)
