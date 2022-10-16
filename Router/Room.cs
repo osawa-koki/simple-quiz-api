@@ -3,17 +3,7 @@ using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 
-public record RoomCreateStruct(
-	string room_name,
-	string room_icon,
-	string explanation,
-	string password,
-	bool is_public
-);
-
-
-public record RoomUpdateStruct(
-	string room_id,
+public record RoomContentStruct(
 	string room_name,
 	string room_icon,
 	string explanation,
@@ -231,14 +221,14 @@ internal static class Room
 	[ProducesResponseType(StatusCodes.Status201Created)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Create(RoomCreateStruct roomCreateStruct, [FromHeader(Name = "Authorization")] string session_id)
+	internal static IResult Create(RoomContentStruct roomContentStruct, [FromHeader(Name = "Authorization")] string session_id)
 	{
 		// ルーム名
-		string room_name = roomCreateStruct.room_name;
+		string room_name = roomContentStruct.room_name;
 		if (room_name.Length < 3 || 30 < room_name.Length) return Results.BadRequest(new {message = "ルーム名は3文字以上、30文字以内で入力してください。"});
 
 		// ルームアイコン(事前に登録)
-		string? room_icon = roomCreateStruct.room_icon;
+		string? room_icon = roomContentStruct.room_icon;
 		if (room_icon != null)
 		{
 			if (Regex.IsMatch(room_icon, @"\.{2,}")) return Results.BadRequest(new {message = "ディレクトリトラバーサル攻撃のおそれのある文字列が指定されています。"});
@@ -246,20 +236,20 @@ internal static class Room
 			if (room_icon.Length < 32 || 38 < room_icon.Length) return Results.BadRequest(new {message = "画像ファイル名の長さが正しくありません。"});
 		}
 
-		string? explanation = roomCreateStruct.explanation;
+		string? explanation = roomContentStruct.explanation;
 		if (explanation != null)
 		{
 			if (100 < explanation.Length) return Results.BadRequest(new {message = "説明文は100文字以内で入力してください。"});
 		}
 
-		string? password = roomCreateStruct.password;
+		string? password = roomContentStruct.password;
 		if (password != null)
 		{
 			if (!Regex.IsMatch(password, @"^[0-9]+$")) return Results.BadRequest(new {message = "パスワードは数字のみで構成してください。"});
 			if (password.Length != 4) return Results.BadRequest(new {message = "パスワードは4文字で構成してください。"});
 		}
 
-		bool is_public = roomCreateStruct.is_public;
+		bool is_public = roomContentStruct.is_public;
 
 		DBClient client = new();
 
@@ -341,16 +331,15 @@ internal static class Room
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Update(RoomUpdateStruct roomUpdateStruct, [FromHeader(Name = "Authorization")] string session_id)
+	internal static IResult Update(string room_id, RoomContentStruct roomContentStruct, [FromHeader(Name = "Authorization")] string session_id)
 	{
-		string room_id = roomUpdateStruct.room_id;
 		if (!Regex.IsMatch(room_id, @"^[a-zA-Z0-9]+$")) return Results.BadRequest(new {message = "ルームIDに不正な文字が含まれています。"});
 		if (room_id.Length != 32) return Results.BadRequest(new {message = "ルームIDの文字数が不正です。"});
 
-		string room_name = roomUpdateStruct.room_name;
+		string room_name = roomContentStruct.room_name;
 		if (room_name.Length < 3 || 30 < room_name.Length) return Results.BadRequest(new {message = "ルーム名は3文字以上、30文字以内で入力してください。"});
 
-		string? room_icon = roomUpdateStruct.room_icon;
+		string? room_icon = roomContentStruct.room_icon;
 		if (room_icon != null)
 		{
 			if (Regex.IsMatch(room_icon, @"\.{2,}")) return Results.BadRequest(new {message = "ディレクトリトラバーサル攻撃のおそれのある文字列が指定されています。"});
@@ -358,20 +347,20 @@ internal static class Room
 			if (room_icon.Length < 32 || 38 < room_icon.Length) return Results.BadRequest(new {message = "画像ファイル名の長さが正しくありません。"});
 		}
 
-		string? explanation = roomUpdateStruct.explanation;
+		string? explanation = roomContentStruct.explanation;
 		if (explanation != null)
 		{
 			if (100 < explanation.Length) return Results.BadRequest(new {message = "説明文は100文字以内で入力してください。"});
 		}
 
-		string? password = roomUpdateStruct.password;
+		string? password = roomContentStruct.password;
 		if (password != null)
 		{
 			if (!Regex.IsMatch(password, @"^[0-9]+$")) return Results.BadRequest(new {message = "パスワードは数字のみで構成してください。"});
 			if (password.Length != 4) return Results.BadRequest(new {message = "パスワードは4文字で構成してください。"});
 		}
 
-		bool is_public = roomUpdateStruct.is_public;
+		bool is_public = roomContentStruct.is_public;
 
 		DBClient client = new();
 

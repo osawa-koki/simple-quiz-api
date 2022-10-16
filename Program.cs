@@ -160,7 +160,7 @@ app.MapDelete("/template/{template_id}", Template.Delete);
 app.MapGet("/room/{room_id}", Room.Detail);
 app.MapGet("/room/list", Room.List);
 app.MapPost("/room", Room.Create);
-app.MapPut("/room", Room.Update);
+app.MapPut("/room{room_id}", Room.Update);
 
 // app.MapGet("/room/quiz", Room.QuizGet);
 // app.MapPost("/room/quiz", Room.QuizAdd);
