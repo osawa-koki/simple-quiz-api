@@ -3,14 +3,14 @@ using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 
-internal struct RoomCreateStruct
-{
-	internal string room_name;
-	internal string? room_icon;
-	internal string? explanation;
-	internal int? pw;
-	internal bool is_public;
-}
+public record RoomCreateStruct(
+	string room_name,
+	string room_icon,
+	string explanation,
+	string password,
+	bool is_public
+);
+
 
 internal struct RoomUpdateStruct
 {
@@ -247,7 +247,7 @@ internal static class Room
 		}
 
 
-		string? password = roomCreateStruct.pw?.ToString();
+		string? password = roomCreateStruct.password?.ToString();
 		if (password != null)
 		{
 			if (password.Length != 4) return Results.BadRequest(new {message = "パスワードは4文字で構成してください。"});
