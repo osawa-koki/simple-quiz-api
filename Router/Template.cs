@@ -486,7 +486,7 @@ internal static class Template
 			client.Add("FROM quiz_templates");
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id");
 			client.AddParam(quiztemplate_id);
-			client.SetDataType("@session_id", SqlDbType.VarChar);
+			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
 			var result = client.Select();
 
 			if (result == null) return Results.NotFound(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
@@ -494,7 +494,7 @@ internal static class Template
 			var owning_user = result["owning_user"]?.ToString();
 			var owning_session = result["owning_session"]?.ToString();
 
-			if (user_id != owning_user && session_id != owning_session) Results.StatusCode(403);
+			if (user_id != owning_user && session_id != owning_session) return Results.StatusCode(403);
 
 			client.Add("DELETE FROM quiz_templates");
 			client.Add("FROM quiz_templates");
