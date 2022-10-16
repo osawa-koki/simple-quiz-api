@@ -323,7 +323,7 @@ internal static class Room
 	/// <response code="404">指定したルームは存在しません。</response>
 	/// <response code="500">ルーム作成処理中に例外が発生しました。</response>
 	[HttpPut]
-	[ProducesResponseType(StatusCodes.Status201Created)]
+	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -382,10 +382,10 @@ internal static class Room
 
 			client.Add("UPDATE rooms");
 			client.Add("SET");
-			client.Add("	room_name = @room_name");
-			client.Add("	room_icon = @room_icon");
-			client.Add("	explanation = @explanation");
-			client.Add("	pw = @pw");
+			client.Add("	room_name = @room_name,");
+			client.Add("	room_icon = @room_icon,");
+			client.Add("	explanation = @explanation,");
+			client.Add("	pw = @pw,");
 			client.Add("	is_public = @is_public");
 			client.Add("WHERE room_id = @room_id;");
 			client.AddParam(room_name);
