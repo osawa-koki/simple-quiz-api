@@ -165,11 +165,11 @@ app.MapPut("/room{room_id}", Room.Update);
 // app.MapGet("/room/members", Room.Members);
 // app.MapPost("/room/join", Room.Join);
 
-app.MapGet("/quiz/{room_id}", Quiz.List);
-app.MapGet("/quiz/{room_id}/{quiz_id}", Quiz.Detail);
-app.MapPost("/quiz/{room_id}", Quiz.Create);
-app.MapPut("/quiz/{room_id}/{quiz_id}", Quiz.Update);
-app.MapDelete("/quiz/{room_id}/{quiz_id}", Quiz.Delete);
+app.MapGet("/quiz/r/{room_id}", Quiz.List);
+app.MapGet("/quiz/{quiz_id}", Quiz.Detail);
+app.MapPost("/quiz/r/{room_id}", Quiz.Create);
+app.MapPut("/quiz/{quiz_id}", Quiz.Update);
+app.MapDelete("/quiz/{quiz_id}", Quiz.Delete);
 
 
 
