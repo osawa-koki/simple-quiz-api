@@ -167,8 +167,8 @@ app.MapPut("/room{room_id}", Room.Update);
 // app.MapPut("/room/quiz", Room.QuizUpdate);
 // app.MapDelete("/room/quiz", Room.QuizDelete);
 
-app.MapGet("/room/members", Room.Members);
-app.MapPost("/room/join", Room.Join);
+// app.MapGet("/room/members", Room.Members);
+// app.MapPost("/room/join", Room.Join);
 
 
 
