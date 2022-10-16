@@ -86,8 +86,8 @@ internal static class Room
 			var room = client.Select();
 
 			if (room == null) return Results.NotFound(new {message = "指定したルームは存在しません。"});
-			if (int.Parse(room["is_valid"].ToString() ?? "-1") != 1) return Results.BadRequest(new {message = "指定したルームは既に終了しています。"});
-			if (room["user_id"].ToString() != user_id && room["session_id"].ToString() != session_id) return Results.Forbid();
+			if (int.Parse(room["is_valid"]?.ToString() ?? "-1") != 1) return Results.BadRequest(new {message = "指定したルームは既に終了しています。"});
+			if (room["user_id"]?.ToString() != user_id && room["session_id"]?.ToString() != session_id) return Results.Forbid();
 
 			return Results.Ok(room);
 
