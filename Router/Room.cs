@@ -29,8 +29,8 @@ internal static class Room
     /// ルーム詳細取得
     /// </summary>
 	/// <remarks>
-	/// 	
-	/// 	Sample request:
+	/// Sample request:
+	/// 
 	/// 		GET /room/fba8c49f09f140d693ddf2a33491a82e
 	/// 	
 	/// </remarks>
