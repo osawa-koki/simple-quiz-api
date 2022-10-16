@@ -502,5 +502,55 @@ internal static class Auth
 	}
 
 
+
+	
+    /// <summary>
+    /// トークンからメールアドレスを逆引き
+    /// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	
+	/// 	Get /auth/mail/82efba8c49f09f140d693ddf2a33491a
+	/// 	
+	/// </remarks>
+    /// <returns>
+	/// {
+	/// 	"mail": "osawakoki@example.com"
+	/// }
+    /// </returns>
+	/// <response code="200">正常に結果が取得できました。</response>
+	/// <response code="400">指定したパラメタが不正です。</response>
+	/// <response code="500">予期せぬ例外が発生しました。</response>
+    [HttpGet]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	internal static dynamic LookUpMail(string token)
+	{
+		try
+		{
+			DBClient client = new();
+
+			client.Add("SELECT mail");
+			client.Add("FROM pre_users");
+			client.Add("WHERE token = @token;");
+			client.AddParam(token);
+			client.SetDataType("@token", SqlDbType.VarChar);
+
+			var result = client.Select();
+
+			if (result == null) return Results.BadRequest(new {message = "無効なトークンです。"});
+
+			return Results.Ok(new {mail = result["mail"]?.ToString()});
+
+		}
+		catch (Exception ex)
+		{
+			return Results.Problem($"{ex}");
+		}
+	}
+
+
+
 }
 
