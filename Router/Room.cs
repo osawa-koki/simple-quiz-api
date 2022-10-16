@@ -26,13 +26,13 @@ public record RoomUpdateStruct(
 public record RoomSummaryStruct(
 	string room_id,
 	string room_name,
-	string room_icon,
-	string explanation,
+	string? room_icon,
+	string? explanation,
 	bool is_public,
 	DateTime rgdt,
 	DateTime updt,
-	string user_name,
-	string user_icon
+	string? user_name,
+	string? user_icon
 );
 
 
@@ -141,7 +141,7 @@ internal static class Room
 	[ProducesResponseType(StatusCodes.Status200OK)]
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult List(int since, int per_page, [FromHeader(Name = "Authorization")] string session_id)
+	internal static IResult List(int since = 0, int per_page = 30, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
 		if (since < 0 || per_page < 0)
 		{
@@ -159,10 +159,9 @@ internal static class Room
 			client.Add("SELECT user_id");
 			client.Add("FROM sessions");
 			client.Add("WHERE session_id = @session_id;");
-			client.AddParam(session_id);
+			client.AddParam(session_id ?? "");
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			string user_id = client.Select()?["user_id"]?.ToString() ?? "";
-
 
 			client.Add("SELECT r.room_id, r.room_name, r.room_icon, r.explanation, r.is_public, r.rgdt, r.updt, u.user_name, u.user_icon");
 			client.Add("FROM rooms r");
@@ -171,11 +170,27 @@ internal static class Room
 			client.Add("WHERE is_valid = 1 AND (r.is_public = 1 OR ow.user_id = @user_id OR ow.session_id = @session_id)");
 			client.Add("ORDER BY updt DESC;");
 			client.AddParam(user_id);
-			client.AddParam(session_id);
+			client.AddParam(session_id ?? "");
 			client.SetDataType("@user_id", SqlDbType.VarChar);
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 
 			var rooms = client.SelectAll();
+
+			List<RoomSummaryStruct> roomSummaryStructs = new();
+			foreach (var room in rooms)
+			{
+				RoomSummaryStruct roomSummaryStruct = new(
+					room["room_id"]?.ToString() ?? "",
+					room["room_name"]?.ToString() ?? "",
+					room["room_icon"]?.ToString(),
+					room["explanation"]?.ToString(),
+					(bool)room["is_public"],
+					(DateTime)room["rgdt"],
+					(DateTime)room["updt"],
+					room["user_name"]?.ToString(),
+					room["user_icon"]?.ToString()
+				);
+			}
 
 			return Results.Ok(rooms);
 
