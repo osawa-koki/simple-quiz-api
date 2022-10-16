@@ -64,46 +64,46 @@ internal static class Template
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			var user_id = client.Select()?["user_id"]?.ToString();
 
-			// 詳細取得処理
-			client.Add("SELECT t.owning_user, t.owning_session, t.is_public, t.content, t.rgdt, t.updt, u.user_name, u.user_icon");
-			client.Add("FROM quiz_templates t");
-			client.Add("INNER JOIN users u ON t.owning_user = u.user_id");
-			client.Add("WHERE is_public = 1 OR owning_user = @user_id OR owning_session = @session_id");
-			client.Add("	AND quiztemplate_id = @quiztemplate_id;");
-			client.AddParam(template_id);
-			var template = client.Select();
+			// // 詳細取得処理
+			// client.Add("SELECT t.owning_user, t.owning_session, t.is_public, t.content, t.rgdt, t.updt, u.user_name, u.user_icon");
+			// client.Add("FROM quiz_templates t");
+			// client.Add("INNER JOIN users u ON t.owning_user = u.user_id");
+			// client.Add("WHERE is_public = 1 OR owning_user = @user_id OR owning_session = @session_id");
+			// client.Add("	AND quiztemplate_id = @quiztemplate_id;");
+			// client.AddParam(template_id);
+			// var template = client.Select();
 
-			if (template == null)
-			{
-				return Results.NotFound(new {message = "指定したテンプレートIDは存在しません。"});
-			}
+			// if (template == null)
+			// {
+			// 	return Results.NotFound(new {message = "指定したテンプレートIDは存在しません。"});
+			// }
 
-			if (template["owning_user"]?.ToString() != user_id && template["owning_session"]?.ToString() != session_id)
-			{
-				return Results.Forbid();
-			}
+			// if (template["owning_user"]?.ToString() != user_id && template["owning_session"]?.ToString() != session_id)
+			// {
+			// 	return Results.Forbid();
+			// }
 
-			TemplateStruct answer = new();
-			answer.quiztemplate_id = template_id;
-			answer.is_public = int.Parse(template["is_public"]?.ToString() ?? "-1") == 1;
-			answer.content = template["content"]?.ToString() ?? "*****";
-			answer.keywords = new();
-			answer.rgdt = DateTime.Parse(template["rgdt"]?.ToString() ?? "*****");
-			answer.updt = DateTime.Parse(template["updt"]?.ToString() ?? "*****");
+			// TemplateStruct answer = new();
+			// answer.quiztemplate_id = template_id;
+			// answer.is_public = int.Parse(template["is_public"]?.ToString() ?? "-1") == 1;
+			// answer.content = template["content"]?.ToString() ?? "*****";
+			// answer.keywords = new();
+			// answer.rgdt = DateTime.Parse(template["rgdt"]?.ToString() ?? "*****");
+			// answer.updt = DateTime.Parse(template["updt"]?.ToString() ?? "*****");
 
-			client.Add("SELECT keyword");
-			client.Add("FROM quiz_template_keywords");
-			client.Add("WHERE quiztemplate_id = @quiztemplate_id");
-			client.AddParam(template_id);
-			client.SetDataType("@quiztemplate_id", SqlDbType.Int);
-			var keywords = client.SelectAll();
+			// client.Add("SELECT keyword");
+			// client.Add("FROM quiz_template_keywords");
+			// client.Add("WHERE quiztemplate_id = @quiztemplate_id");
+			// client.AddParam(template_id);
+			// client.SetDataType("@quiztemplate_id", SqlDbType.Int);
+			// var keywords = client.SelectAll();
 
-			foreach (var keyword in keywords)
-			{
-				answer.keywords.Add(keyword["keyword"]?.ToString() ?? "*****");
-			}
+			// foreach (var keyword in keywords)
+			// {
+			// 	answer.keywords.Add(keyword["keyword"]?.ToString() ?? "*****");
+			// }
 
-			return Results.Ok(answer);
+			return Results.Ok();
 
 		}
 		catch (Exception ex)
@@ -342,9 +342,8 @@ internal static class Template
     /// </summary>
 	/// Sample request:
 	/// 	
-	/// 	PUT /template
+	/// 	PUT /template/
 	/// 	{
-	/// 		"quiztemplate_id": 100,
 	/// 		"is_public": true,
 	/// 		"content": "世界で${number}番目に高い山は???",
 	/// 		"transfer_to": "user_hoge",
