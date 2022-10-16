@@ -188,9 +188,9 @@ internal static class Template
 			return Results.Ok(templateSummaryStructs);
 
 		}
-		catch ()
+		catch (Exception ex)
 		{
-			return Results.Problem();
+			return Results.Problem($"{ex}");
 		}
 	}
 
