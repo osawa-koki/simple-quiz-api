@@ -328,7 +328,7 @@ internal static class Template
 			List<string> keywords = new();
 			foreach (var keyword in templateContentStruct.keywords)
 			{
-				keywords.Add($"('{quiztemplate_id.Replace("'", "''")}', '{keyword.Replace("'", "''")}')");
+				keywords.Add($"('{quiztemplate_id.Replace("'", "''")}', N'{keyword.Replace("'", "''")}')");
 			}
 			client.Add(string.Join(",", keywords) + ";");
 			client.Execute();
