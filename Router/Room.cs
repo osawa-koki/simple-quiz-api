@@ -47,6 +47,13 @@ public record MemberInfoStruct(
 );
 
 
+public record ChmodStruct(
+	string room_id,
+	string session_id,
+	string privilege
+);
+
+
 internal static class Room
 {
 
@@ -370,8 +377,8 @@ internal static class Room
 	/// 	POST /room/c49f09f140d693ddf2a33491a82efba8
 	/// 	{
 	/// 		"room_name": "ITクイズ大会♪",
-	/// 		"room_icon": "491a82efba8c49f09f140d693ddf2a33.png"
-	/// 		"explanation": "ITに関する簡単なクイズ大会で～す♪"
+	/// 		"room_icon": "491a82efba8c49f09f140d693ddf2a33.png",
+	/// 		"explanation": "ITに関する簡単なクイズ大会で～す♪",
 	/// 		"pw": null,
 	/// 		"is_public": true
 	/// 	}
@@ -472,6 +479,69 @@ internal static class Room
 			return Results.Problem($"{ex}");
 		}
 	}
+
+
+
+	/// <summary>
+	/// 【完成】権限変更(所有者のみ可)
+	/// </summary>
+	/// <remarks>
+	/// Sample request:
+	/// 	
+	/// 	POST /room/chmod
+	/// 	{
+	/// 		"room_id": "693491a82efba8c49f09f140dddf2a33",
+	/// 		"session_id": "491a82efba8c49f09f140d693ddf2a33",
+	/// 		"privilege": "A"
+	/// 	}
+	/// 	
+	/// </remarks>
+	/// <returns>
+	/// 	{}
+	/// </returns>
+	/// <response code="200">正常にルームが更新されました。</response>
+	/// <response code="400">不正なパラメタが送信されました。</response>
+	/// <response code="403">操作を実行するための権限がありません。</response>
+	/// <response code="404">指定したルームは存在しません。</response>
+	/// <response code="500">ルーム作成処理中に例外が発生しました。</response>
+	[HttpPut]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status403Forbidden)]
+	[ProducesResponseType(StatusCodes.Status404NotFound)]
+	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+	internal static IResult Chmod(ChmodStruct chmodStruct, [FromHeader(Name = "Authorization")] string session_id)
+	{
+		if (session_id == "") return Results.BadRequest(new {message = "セッションが不在です。"});
+
+		var room_id = chmodStruct.room_id;
+		var target_session_id = chmodStruct.session_id;
+
+		DBClient client = new();
+
+		try
+		{
+			client.Add("SELECT user_id");
+			client.Add("FROM sessions");
+			client.Add("WHERE session_id = @session_id;");
+			client.AddParam(session_id);
+			client.SetDataType("@session_id", SqlDbType.VarChar);
+			var user_id = client.Select()?["user_id"]?.ToString();
+
+
+
+			client.Execute();
+
+			return Results.Ok(new {});
+
+		}
+		catch (Exception ex)
+		{
+			return Results.Problem($"{ex}");
+		}
+	}
+
+	
 
 
 
