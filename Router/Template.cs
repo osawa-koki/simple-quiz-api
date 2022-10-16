@@ -309,8 +309,8 @@ internal static class Template
 
 			// テンプレートの登録
 			client.Add("INSERT INTO quiz_templates(quiztemplate_id, owning_user, owning_session, content, is_public)");
-			client.Add("VALUES(@quiztemplate_id, @owning_user, @owning_session, @content, @is_public)");
-			client.Add(quiztemplate_id);
+			client.Add("VALUES(@quiztemplate_id, @owning_user, @owning_session, @content, @is_public);");
+			client.AddParam(quiztemplate_id);
 			client.AddParam(user_id != null ? user_id : DBNull.Value);
 			client.AddParam(session_id);
 			client.AddParam(templateContentStruct.content);
@@ -318,7 +318,7 @@ internal static class Template
 			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
 			client.SetDataType("@owning_user", SqlDbType.VarChar);
 			client.SetDataType("@owning_session", SqlDbType.VarChar);
-			client.SetDataType("@content", SqlDbType.VarChar);
+			client.SetDataType("@content", SqlDbType.NVarChar);
 			client.SetDataType("@is_public", SqlDbType.Bit);
 			client.Execute();
 
