@@ -316,25 +316,20 @@ internal static class Room
 	[ProducesResponseType(StatusCodes.Status400BadRequest)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Update(RoomUpdateStruct roomUpdateStruct, HttpContext context)
+	internal static IResult Update(RoomUpdateStruct roomUpdateStruct, [FromHeader(Name = "Authorization")] string session_id)
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id_raw;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
-		string session_id = session_id_raw.ToString();
-		if (!auth_filled || session_id == "")
-		{
-			return Results.BadRequest(new { message = "認証トークンが不在です。"});
-		}
+		string room_id = roomUpdateStruct.room_id;
+		if (!Regex.IsMatch(room_id, @"^[a-zA-Z0-9]+$")) return Results.BadRequest(new {message = "ルームIDに不正な文字が含まれています。"});
+		if (room_id.Length != 32) return Results.BadRequest(new {message = "ルームIDも文字数が不正です。"});
 
 		string room_name = roomUpdateStruct.room_name;
 		if (room_name.Length < 3 || 30 < room_name.Length) return Results.BadRequest(new {message = "ルーム名は3文字以上、30文字以内で入力してください。"});
-
 
 		string? room_icon = roomUpdateStruct.room_icon;
 		if (room_icon != null)
 		{
 			if (Regex.IsMatch(room_icon, @"\.{2,}")) return Results.BadRequest(new {message = "ディレクトリトラバーサル攻撃のおそれのある文字列が指定されています。"});
-			if (Regex.IsMatch(room_icon, @"[^a-zA-Z0-9\.]")) return Results.BadRequest(new {message = "不正な文字が画像ファイル名として使用されています。"});
+			if (!Regex.IsMatch(room_icon, @"^[a-zA-Z0-9\.]+$")) return Results.BadRequest(new {message = "不正な文字が画像ファイル名として使用されています。"});
 			if (room_icon.Length < 32 || 38 < room_icon.Length) return Results.BadRequest(new {message = "画像ファイル名の長さが正しくありません。"});
 		}
 
@@ -344,15 +339,14 @@ internal static class Room
 			if (100 < explanation.Length) return Results.BadRequest(new {message = "説明文は100文字以内で入力してください。"});
 		}
 
-
-		string? password = roomUpdateStruct.password?.ToString();
+		string? password = roomUpdateStruct.password;
 		if (password != null)
 		{
+			if (!Regex.IsMatch(password, @"^[0-9]+$")) return Results.BadRequest(new {message = "パスワードは数字のみで構成してください。"});
 			if (password.Length != 4) return Results.BadRequest(new {message = "パスワードは4文字で構成してください。"});
 		}
 
 		bool is_public = roomUpdateStruct.is_public;
-
 
 		DBClient client = new();
 
@@ -368,6 +362,8 @@ internal static class Room
 			client.Add("SELECT user_id, session_id");
 			client.Add("FROM room_owners");
 			client.Add("WHERE room_id = @room_id;");
+			client.AddParam(room_id);
+			client.SetDataType("room_id", SqlDbType.VarChar);
 			var owner = client.Select();
 
 			if (owner == null) return Results.NotFound();
