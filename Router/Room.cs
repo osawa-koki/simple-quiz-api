@@ -212,8 +212,8 @@ internal static class Room
 	/// 	POST /room
 	/// 	{
 	/// 		"room_name": "ITクイズ大会♪",
-	/// 		"room_icon": "491a82efba8c49f09f140d693ddf2a33.png"
-	/// 		"explanation": "ITに関する簡単なクイズ大会で～す♪"
+	/// 		"room_icon": "491a82efba8c49f09f140d693ddf2a33.png",
+	/// 		"explanation": "ITに関する簡単なクイズ大会で～す♪",
 	/// 		"password": null,
 	/// 		"is_public": true
 	/// 	}
