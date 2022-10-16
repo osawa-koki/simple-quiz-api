@@ -106,7 +106,7 @@ internal static class Room
 
 
 	/// <summary>
-	/// ルーム一覧取得
+	/// 【完成】ルーム一覧取得
 	/// </summary>
 	/// <remarks>
 	/// 	
