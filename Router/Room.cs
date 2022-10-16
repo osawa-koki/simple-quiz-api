@@ -190,7 +190,7 @@ internal static class Room
 
 
 	/// <summary>
-	/// ルーム新規作成
+	/// 【完成】ルーム新規作成
 	/// </summary>
 	/// <remarks>
 	/// Sample request:
