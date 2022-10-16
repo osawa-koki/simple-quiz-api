@@ -365,16 +365,8 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Update(int template_id, TemplateStruct templateStruct, HttpContext context)
+	internal static IResult Update(string template_id, TemplateContentStruct templateContentStruct, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
-		Microsoft.Extensions.Primitives.StringValues session_id_raw;
-		bool auth_filled = context.Request.Headers.TryGetValue("Authorization", out session_id_raw);
-		string session_id = session_id_raw.ToString();
-		if (!auth_filled || session_id == "")
-		{
-			return Results.BadRequest(new { message = "認証トークンが不在です。"});
-		}
-
 		DBClient client = new();
 
 		try
@@ -388,48 +380,37 @@ internal static class Template
 
 			client.Add("SELECT owning_user, owning_session");
 			client.Add("FROM quiz_templates");
-			client.Add("WHERE quiztemplate_id = @quiztemplate_id");
+			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
 			client.AddParam(template_id);
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			var result = client.Select();
 
-			if (result == null)
-			{
-				return Results.NotFound(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
-			}
+			if (result == null) return Results.NotFound(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
 
 			var owning_user = result["owning_user"]?.ToString();
 			var owning_session = result["owning_session"]?.ToString();
 
-			if (user_id != owning_user && session_id != owning_session)
-			{
-				return Results.Forbid();
-			}
+			if (user_id != owning_user && session_id != owning_session) return Results.StatusCode(403);
 
 			// テンプレートの更新処理
 			client.Add("UPDATE quiz_templates");
 			client.Add("SET");
-			client.Add("	owning_user = @owning_user");
-			client.Add("	is_public = @is_public");
-			client.Add("	content = @content");
-			client.Add("	updt = CURRENT_TIMESTAMP;");
-			client.Add("WHERE quiztemplate_id = @quiztemplate_id");
-			// transfer_toプロパティがメールアドレスとして有効であれば所有者を変更。
-			// 型推論が弱い、、、
-			client.AddParam(Regex.IsMatch(templateStruct.transfer_to ?? "", @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$") ? templateStruct.transfer_to ?? "" : (user_id != null ? user_id : DBNull.Value));
-			client.AddParam(templateStruct.is_public ? 1 : 0);
-			client.AddParam(templateStruct.content);
+			client.Add("	content = @content,");
+			client.Add("	is_public = @is_public,");
+			client.Add("	updt = GET_TOKYO_DATETIME()");
+			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
+			client.AddParam(templateContentStruct.content);
+			client.AddParam(templateContentStruct.is_public);
 			client.AddParam(template_id);
-			client.SetDataType("@owning_user", SqlDbType.VarChar);
-			client.SetDataType("@is_public", SqlDbType.Bit);
 			client.SetDataType("@content", SqlDbType.VarChar);
-			client.SetDataType("@quiztemplate_id", SqlDbType.Int);
+			client.SetDataType("@is_public", SqlDbType.Bit);
+			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
 
 			// 既に存在するキーワード一覧を削除
 			client.Add("DELETE FROM quiz_template_keywords");
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
 			client.AddParam(template_id);
-			client.SetDataType("@quiztemplate_id", SqlDbType.Int);
+			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
 			client.Execute();
 
 
@@ -437,9 +418,9 @@ internal static class Template
 			client.Add("INSERT INTO quiz_template_keywords(quiztemplate_id, keyword)");
 			client.Add("VALUES");
 			List<string> keywords = new();
-			foreach (var keyword in templateStruct.keywords)
+			foreach (var keyword in templateContentStruct.keywords)
 			{
-				keywords.Add($"({template_id}, {keyword})");
+				keywords.Add($"('{template_id.Replace("'", "''")}', '{keyword.Replace("'", "''")}')");
 			}
 			client.Add(string.Join(",", keywords) + ";");
 			client.Execute();
