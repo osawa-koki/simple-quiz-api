@@ -45,7 +45,7 @@ namespace DBMod
 			_sqlParamsDataType.Clear();
 		}
 
-		private List<Dictionary<string, object>> Run(SQLMethod sqlmethod)
+		private List<Dictionary<string, object?>> Run(SQLMethod sqlmethod)
 		{
 			if (connection_string == null) Error("接続文字列が指定されていません。");
 
@@ -67,7 +67,7 @@ namespace DBMod
 
 			if (sqlmethod != SQLMethod.Execute)
 			{
-				List<Dictionary<string, object>> answer = new(){};
+				List<Dictionary<string, object?>> answer = new(){};
 				using (SqlDataReader reader = command.ExecuteReader())
 				{
 					Reset();
@@ -75,11 +75,12 @@ namespace DBMod
 					{
 						if (!reader.Read()) return answer;
 
-						Dictionary<string, object> field = new(){};
+						Dictionary<string, object?> field = new(){};
 
 						for (var j = 0; j < reader.FieldCount; j++)
 						{
-							field[reader.GetName(j)] = reader.GetValue(j);
+							var cell_value = reader.GetValue(j);
+							field[reader.GetName(j)] = cell_value != DBNull.Value ? cell_value : null;
 						}
 						answer.Add(field);
 						return answer;
@@ -89,11 +90,12 @@ namespace DBMod
 					{
 						while (reader.Read())
 						{
-							Dictionary<string, object> field = new(){};
+							Dictionary<string, object?> field = new(){};
 
 							for (var j = 0; j < reader.FieldCount; j++)
 							{
-								field[reader.GetName(j)] = reader.GetValue(j);
+							var cell_value = reader.GetValue(j);
+							field[reader.GetName(j)] = cell_value != DBNull.Value ? cell_value : null;
 							}
 							answer.Add(field);
 						}
@@ -105,18 +107,18 @@ namespace DBMod
 			{
 				command.ExecuteNonQuery();
 				Reset();
-				return new List<Dictionary<string, object>>{};
+				return new List<Dictionary<string, object?>>{};
 			}
 		}
 
-		internal Dictionary<string, object>? Select()
+		internal Dictionary<string, object?>? Select()
 		{
 			var result = Run(SQLMethod.Select);
 			if (result.Count == 0) return null;
 			return result[0];
 		}
 
-		internal List<Dictionary<string, object>> SelectAll()
+		internal List<Dictionary<string, object?>> SelectAll()
 		{
 			return Run(SQLMethod.SelectAll);
 		}
