@@ -49,6 +49,10 @@ namespace DBMod
 		{
 			if (connection_string == null) Error("接続文字列が指定されていません。");
 
+#if DEBUG
+			File.AppendAllText("sql.log", _sql + Environment.NewLine + Environment.NewLine + Environment.NewLine);
+#endif
+
 			using var connection = new SqlConnection(connection_string);
 			connection.Open();
 
