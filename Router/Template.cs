@@ -86,7 +86,7 @@ internal static class Template
 				return Results.NotFound(new {message = "指定したテンプレートIDは存在しません。"});
 			}
 
-			if (template["owning_user"].ToString() != user_id && template["owning_session"] != session_id)
+			if (template["owning_user"]?.ToString() != user_id && template["owning_session"]?.ToString() != session_id)
 			{
 				return Results.Forbid();
 			}
@@ -94,10 +94,10 @@ internal static class Template
 			TemplateStruct answer = new();
 			answer.quiztemplate_id = template_id;
 			answer.is_public = int.Parse(template["is_public"]?.ToString() ?? "-1") == 1;
-			answer.content = template["content"].ToString() ?? "*****";
+			answer.content = template["content"]?.ToString() ?? "*****";
 			answer.keywords = new();
-			answer.rgdt = DateTime.Parse(template["rgdt"].ToString() ?? "*****");
-			answer.updt = DateTime.Parse(template["updt"].ToString() ?? "*****");
+			answer.rgdt = DateTime.Parse(template["rgdt"]?.ToString() ?? "*****");
+			answer.updt = DateTime.Parse(template["updt"]?.ToString() ?? "*****");
 
 			client.Add("SELECT keyword");
 			client.Add("FROM quiz_template_keywords");
@@ -420,8 +420,8 @@ internal static class Template
 				return Results.NotFound(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
 			}
 
-			var owning_user = result["owning_user"].ToString();
-			var owning_session = result["owning_session"].ToString();
+			var owning_user = result["owning_user"]?.ToString();
+			var owning_session = result["owning_session"]?.ToString();
 
 			if (user_id != owning_user && session_id != owning_session)
 			{
@@ -438,7 +438,7 @@ internal static class Template
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id");
 			// transfer_toプロパティがメールアドレスとして有効であれば所有者を変更。
 			// 型推論が弱い、、、
-			client.AddParam(Regex.IsMatch(templateStruct.transfer_to ?? "", @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$") ? templateStruct.transfer_to ?? "____" : (user_id != null ? user_id : DBNull.Value));
+			client.AddParam(Regex.IsMatch(templateStruct.transfer_to ?? "", @"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$") ? templateStruct.transfer_to ?? "" : (user_id != null ? user_id : DBNull.Value));
 			client.AddParam(templateStruct.is_public ? 1 : 0);
 			client.AddParam(templateStruct.content);
 			client.AddParam(template_id);
@@ -534,8 +534,8 @@ internal static class Template
 				return Results.NotFound(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
 			}
 
-			var owning_user = result["owning_user"].ToString();
-			var owning_session = result["owning_session"].ToString();
+			var owning_user = result["owning_user"]?.ToString();
+			var owning_session = result["owning_session"]?.ToString();
 
 			if (user_id != owning_user && session_id != owning_session)
 			{
