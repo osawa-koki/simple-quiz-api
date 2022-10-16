@@ -26,6 +26,27 @@ public record RoomSummaryStruct(
 );
 
 
+public record RoomDetailStruct(
+	string room_id,
+	string room_name,
+	string? room_icon,
+	string? explanation,
+	bool is_public,
+	DateTime rgdt,
+	DateTime updt,
+	string? user_name,
+	string? user_icon,
+	List<MemberInfoStruct> members
+);
+
+public record MemberInfoStruct(
+	string user_id,
+	string user_name,
+	string? comment,
+	string? user_icon
+);
+
+
 internal static class Room
 {
 
@@ -88,6 +109,40 @@ internal static class Room
 			if (room == null) return Results.NotFound(new {message = "指定したルームは存在しません。"});
 			if (int.Parse(room["is_valid"]?.ToString() ?? "-1") != 1) return Results.BadRequest(new {message = "指定したルームは既に終了しています。"});
 			if (room["user_id"]?.ToString() != user_id && room["session_id"]?.ToString() != session_id) return Results.Forbid();
+
+
+			client.Add("SELECT u.user_id, u.user_name, u.comment, u.user_icon");
+			client.Add("FROM room_users ru");
+			client.Add("LEFT JOIN users u ON ru.room_id = u.user_id AND ru.room_id = @room_id;");
+			client.AddParam(room_id);
+			client.SetDataType("@room_id", SqlDbType.VarChar);
+			var members = client.SelectAll();
+
+			List<MemberInfoStruct> memberInfoStructs = new();
+			foreach (var member in members)
+			{
+				MemberInfoStruct memberInfoStruct = new(
+					member["user_id"].ToString(),
+					member["user_name"].ToString(),
+					member["comment"]?.ToString(),
+					member["user_icon"]?.ToString()
+				);
+				memberInfoStructs.Add(memberInfoStruct);
+			}
+
+
+			RoomDetailStruct roomDetailStruct = new(
+				room["room_id"]?.ToString() ?? "",
+				room["room_name"]?.ToString() ?? "",
+				room["room_icon"]?.ToString(),
+				room["explanation"]?.ToString(),
+				(bool)room["is_public"],
+				(DateTime)room["rgdt"],
+				(DateTime)room["updt"],
+				room["user_name"]?.ToString(),
+				room["user_icon"]?.ToString(),
+				memberInfoStructs
+			);
 
 			return Results.Ok(room);
 
