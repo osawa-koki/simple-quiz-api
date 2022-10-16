@@ -2,7 +2,7 @@
 
 CREATE TABLE rooms(
 	room_id VARCHAR(32) PRIMARY KEY,
-	room_name VARCHAR(30) NOT NULL,
+	room_name NVARCHAR(30) NOT NULL,
 	room_icon VARCHAR(38) NULL,
 	explanation NVARCHAR(100) NULL,
 	pw CHAR(4) NULL CHECK(LEN(pw) = 4),
