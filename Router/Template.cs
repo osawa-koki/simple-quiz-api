@@ -390,7 +390,7 @@ internal static class Template
 			client.Add("FROM quiz_templates");
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
 			client.AddParam(quiztemplate_id);
-			client.SetDataType("@session_id", SqlDbType.VarChar);
+			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
 			var result = client.Select();
 
 			if (result == null) return Results.NotFound(new {message = "指定したトークンで示されるクイズテンプレートは存在しません。"});
@@ -405,7 +405,7 @@ internal static class Template
 			client.Add("SET");
 			client.Add("	content = @content,");
 			client.Add("	is_public = @is_public,");
-			client.Add("	updt = GET_TOKYO_DATETIME()");
+			client.Add("	updt = dbo.GET_TOKYO_DATETIME()");
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
 			client.AddParam(templateContentStruct.content);
 			client.AddParam(templateContentStruct.is_public);
@@ -413,6 +413,7 @@ internal static class Template
 			client.SetDataType("@content", SqlDbType.VarChar);
 			client.SetDataType("@is_public", SqlDbType.Bit);
 			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
+			client.Execute();
 
 			// 既に存在するキーワード一覧を削除
 			client.Add("DELETE FROM quiz_template_keywords");
