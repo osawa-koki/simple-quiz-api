@@ -351,7 +351,7 @@ internal static class Template
     /// </summary>
 	/// Sample request:
 	/// 	
-	/// 	PUT /template/
+	/// 	PUT /template/de981421671f4f1895f6800ce04beec1
 	/// 	{
 	/// 		"is_public": true,
 	/// 		"content": "世界で${number}番目に高い山は???",
@@ -452,7 +452,7 @@ internal static class Template
 	/// <remarks>
 	/// Sample request:
 	/// 	
-	/// 	DELETE /template/100
+	/// 	DELETE /template/de981421671f4f1895f6800ce04beec1
 	/// 	
 	/// </remarks>
     /// <returns>
