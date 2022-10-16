@@ -82,7 +82,7 @@ internal static class Room
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Detail(string room_id, [FromHeader(Name = "Authorization")] string session_id)
+	internal static IResult Detail(string room_id, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
 		DBClient client = new();
 
