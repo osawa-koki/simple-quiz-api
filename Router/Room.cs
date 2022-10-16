@@ -392,7 +392,7 @@ internal static class Room
 			var owner = client.Select();
 
 			if (owner == null) return Results.NotFound();
-			if (owner["user_id"].ToString() != user_id && owner["session_id"].ToString() != session_id) return Results.Forbid();
+			if ((owner["user_id"]?.ToString() ?? "") != user_id && (owner["session_id"]?.ToString() ?? "") != session_id) return Results.Forbid();
 
 			client.Add("UPDATE rooms");
 			client.Add("SET");
