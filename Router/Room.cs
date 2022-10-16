@@ -299,7 +299,7 @@ internal static class Room
 
 
 	/// <summary>
-	/// ルーム更新
+	/// 【完成】ルーム更新
 	/// </summary>
 	/// <remarks>
 	/// Sample request:
