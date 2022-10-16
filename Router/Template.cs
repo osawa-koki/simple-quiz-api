@@ -63,7 +63,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Detail(string template_id, [FromHeader(Name = "Authorization")] string session_id = "")
+	internal static IResult Detail(string quiztemplate_id, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
 		DBClient client = new();
 
@@ -81,7 +81,8 @@ internal static class Template
 			client.Add("FROM quiz_templates t");
 			client.Add("INNER JOIN users u ON t.owning_user = u.user_id");
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
-			client.AddParam(template_id);
+			client.AddParam(quiztemplate_id);
+			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
 			var template = client.Select();
 
 			if (template == null) return Results.NotFound(new {message = "指定したテンプレートIDは存在しません。"});
@@ -91,8 +92,8 @@ internal static class Template
 			client.Add("SELECT keyword");
 			client.Add("FROM quiz_template_keywords");
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id");
-			client.AddParam(template_id);
-			client.SetDataType("@quiztemplate_id", SqlDbType.Int);
+			client.AddParam(quiztemplate_id);
+			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
 			List<string> keywords = new();
 			foreach (var keyword in client.SelectAll())
 			{
@@ -100,7 +101,7 @@ internal static class Template
 			}
 
 			TemplateDetailStruct templateDetailStruct = new(
-				template_id,
+				quiztemplate_id,
 				(string)template["content"],
 				(bool)template["is_public"],
 				(int)template["n_of_used"],
@@ -372,7 +373,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Update(string template_id, TemplateContentStruct templateContentStruct, [FromHeader(Name = "Authorization")] string session_id = "")
+	internal static IResult Update(string quiztemplate_id, TemplateContentStruct templateContentStruct, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
 		DBClient client = new();
 
@@ -388,7 +389,7 @@ internal static class Template
 			client.Add("SELECT owning_user, owning_session");
 			client.Add("FROM quiz_templates");
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
-			client.AddParam(template_id);
+			client.AddParam(quiztemplate_id);
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			var result = client.Select();
 
@@ -408,7 +409,7 @@ internal static class Template
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
 			client.AddParam(templateContentStruct.content);
 			client.AddParam(templateContentStruct.is_public);
-			client.AddParam(template_id);
+			client.AddParam(quiztemplate_id);
 			client.SetDataType("@content", SqlDbType.VarChar);
 			client.SetDataType("@is_public", SqlDbType.Bit);
 			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
@@ -416,7 +417,7 @@ internal static class Template
 			// 既に存在するキーワード一覧を削除
 			client.Add("DELETE FROM quiz_template_keywords");
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
-			client.AddParam(template_id);
+			client.AddParam(quiztemplate_id);
 			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
 			client.Execute();
 
@@ -427,7 +428,7 @@ internal static class Template
 			List<string> keywords = new();
 			foreach (var keyword in templateContentStruct.keywords)
 			{
-				keywords.Add($"('{template_id.Replace("'", "''")}', '{keyword.Replace("'", "''")}')");
+				keywords.Add($"('{quiztemplate_id.Replace("'", "''")}', '{keyword.Replace("'", "''")}')");
 			}
 			client.Add(string.Join(",", keywords) + ";");
 			client.Execute();
@@ -467,7 +468,7 @@ internal static class Template
 	[ProducesResponseType(StatusCodes.Status403Forbidden)]
 	[ProducesResponseType(StatusCodes.Status404NotFound)]
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-	internal static IResult Delete(string template_id, [FromHeader(Name = "Authorization")] string session_id = "")
+	internal static IResult Delete(string quiztemplate_id, [FromHeader(Name = "Authorization")] string session_id = "")
 	{
 		DBClient client = new();
 
@@ -483,7 +484,7 @@ internal static class Template
 			client.Add("SELECT owning_user, owning_session");
 			client.Add("FROM quiz_templates");
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id");
-			client.AddParam(template_id);
+			client.AddParam(quiztemplate_id);
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			var result = client.Select();
 
@@ -497,7 +498,7 @@ internal static class Template
 			client.Add("DELETE FROM quiz_templates");
 			client.Add("FROM quiz_templates");
 			client.Add("WHERE quiztemplate_id = @quiztemplate_id;");
-			client.AddParam(template_id);
+			client.AddParam(quiztemplate_id);
 			client.SetDataType("@quiztemplate_id", SqlDbType.VarChar);
 			client.Execute();
 
