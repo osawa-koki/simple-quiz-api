@@ -341,7 +341,7 @@ internal static class Auth
 			client.AddParam(session_id);
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			client.Execute();
-			return Results.Ok();
+			return Results.Ok(new {});
 		}
 		catch (Exception ex)
 		{
