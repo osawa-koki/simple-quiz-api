@@ -311,7 +311,7 @@ internal static class Auth
 
 
     /// <summary>
-    /// セッション管理用のトークンを無効化します。
+    /// 【完成】セッション管理用のトークンを無効化します。
     /// </summary>
 	/// <remarks>
 	/// Sample request:
@@ -347,7 +347,7 @@ internal static class Auth
 
 
     /// <summary>
-    /// サインイン処理
+    /// 【完成】サインイン処理
     /// </summary>
 	/// <remarks>
 	/// Sample request:
