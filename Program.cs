@@ -162,14 +162,14 @@ app.MapGet("/room/list", Room.List);
 app.MapPost("/room", Room.Create);
 app.MapPut("/room{room_id}", Room.Update);
 
-app.MapGet("/quiz/{room_id}", Room.QuizGet);
-app.MapPost("/quiz/{room_id}", Room.QuizAdd);
-app.MapPut("/quiz/{room_id}/{quiz_id}", Room.QuizUpdate);
-app.MapDelete("/quiz/{room_id}/{quiz_id}", Room.QuizDelete);
-
 // app.MapGet("/room/members", Room.Members);
 // app.MapPost("/room/join", Room.Join);
 
+app.MapGet("/quiz/{room_id}", Quiz.List);
+app.MapGet("/quiz/{room_id}/{quiz_id}", Quiz.Detail);
+app.MapPost("/quiz/{room_id}", Quiz.Create);
+app.MapPut("/quiz/{room_id}/{quiz_id}", Quiz.Update);
+app.MapDelete("/quiz/{room_id}/{quiz_id}", Quiz.Delete);
 
 
 
