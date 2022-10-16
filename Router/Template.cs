@@ -27,7 +27,6 @@ public record TemplateDetailStruct(
 	List<string> keywords
 );
 
-#pragma warning restore
 
 public record TemplateContentStruct(
 	string content,
@@ -35,7 +34,7 @@ public record TemplateContentStruct(
 	List<string> keywords
 );
 
-
+#pragma warning restore
 
 internal static class Template
 {
