@@ -254,7 +254,7 @@ internal static class Auth
 
 			// トークンをセット
 			string token = Guid.NewGuid().ToString("N");
-			client.Add($"EXEC set_mail_token @mail = '{mail.Replace("'", "''")}', @token = '{token.Replace("'", "''")}', @user_id = '{user_id.Replace("'", "''")}', @user_name = '{user_name.Replace("'", "''")}', @pw = '{Util.Hasher_sha256($"@{password}@")}', @comment = {(comment != null ? $"'{comment.Replace("'", "''")}'" : "null")}, @user_icon = {(user_icon != null ? $"'{user_icon.Replace("'", "''")}'" : "null")};"); // SQLインジェクション攻撃対策
+			client.Add($"EXEC set_mail_token @mail = '{mail.Replace("'", "''")}', @token = '{token.Replace("'", "''")}', @user_id = '{user_id.Replace("'", "''")}', @user_name = N'{user_name.Replace("'", "''")}', @pw = '{Util.Hasher_sha256($"@{password}@")}', @comment = {(comment != null ? $"'{comment.Replace("'", "''")}'" : "null")}, @user_icon = {(user_icon != null ? $"'{user_icon.Replace("'", "''")}'" : "null")};"); // SQLインジェクション攻撃対策
 			client.Execute();
 
 			MailSetting mailSetting = new()
