@@ -335,12 +335,12 @@ internal static class Auth
 
 			if (pre_users_data == null) return Results.BadRequest(new {message = "指定したトークンは無効です。"});
 
-			var user_id = pre_users_data["user_id"].ToString();
-			var mail = pre_users_data["mail"].ToString();
-			var user_name = pre_users_data["user_name"].ToString();
-			var password = pre_users_data["pw"].ToString();
-			var comment = pre_users_data["comment"].ToString();
-			var user_icon = pre_users_data["user_icon"].ToString();
+			var user_id = pre_users_data["user_id"]?.ToString();
+			var mail = pre_users_data["mail"]?.ToString();
+			var user_name = pre_users_data["user_name"]?.ToString();
+			var password = pre_users_data["pw"]?.ToString();
+			var comment = pre_users_data["comment"]?.ToString();
+			var user_icon = pre_users_data["user_icon"]?.ToString();
 
 			client.Add("INSERT INTO users(user_id, mail, user_name, pw, comment, user_icon)");
 			client.Add("VALUES(@user_id, @mail, @user_name, @pw, @comment, @user_icon);");
