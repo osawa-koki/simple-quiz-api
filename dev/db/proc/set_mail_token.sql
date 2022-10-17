@@ -33,7 +33,7 @@ SET
 	comment = @comment,
 	user_icon = @user_icon,
 	updt = dbo.GET_TOKYO_DATETIME()
-WHERE mail = @mail AND @is_exist = 1;
+WHERE @is_exist = 1 AND mail = @mail;
 
 
 END
