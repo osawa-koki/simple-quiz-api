@@ -210,12 +210,32 @@ internal static class Auth
 			DBClient client = new();
 
 			// 既に登録済みかチェック
-			client.Add("SELECT user_id");
+			// -> 対象は「pre_users」と「users」
+			client.Add("SELECT user_id, mail");
 			client.Add("FROM users");
-			client.Add("WHERE mail = @mail");
+			client.Add("WHERE user_id = @user_id OR mail = @mail");
+			client.Add("UNION");
+			client.Add("SELECT user_id, mail");
+			client.Add("FROM pre_users");
+			client.Add("WHERE user_id = @user_id;");
+			client.AddParam(user_id);
 			client.AddParam(mail);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
 			client.SetDataType("@mail", SqlDbType.VarChar);
-			if (client.Select() != null) return Results.BadRequest(new { message = "既に登録済みのメールアドレスです。"});
+			var users_state_data = client.Select();
+
+			if (users_state_data != null)
+			{
+				if (users_state_data["user_id"]?.ToString() == user_id)
+				{
+					return Results.BadRequest(new { message = "指定したユーザIDは既に使用されています。"});
+				}
+				if (users_state_data["mail"]?.ToString() == mail)
+				{
+					return Results.BadRequest(new { message = "既に登録済みのメールアドレスです。"});
+				}
+				return Results.BadRequest(new { message = "不明なエラー。"});
+			}
 
 
 			// 一定時間前に送信してたら
