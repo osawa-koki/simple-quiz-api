@@ -242,7 +242,7 @@ internal static class Auth
 			client.Add("SELECT mail");
 			client.Add("FROM pre_users");
 			client.Add("WHERE mail = @mail");
-			client.Add("	AND DATEADD(SECOND, -30, GETDATE()) < updt;");
+			client.Add("	AND DATEADD(SECOND, -30, dbo.GET_TOKYO_DATETIME()) < updt;");
 			client.AddParam(mail);
 			client.SetDataType("@mail", SqlDbType.VarChar);
 			if (client.Select() != null) return Results.BadRequest(new { message = "30秒以上間隔を開けてください。"});
@@ -351,7 +351,12 @@ internal static class Auth
 			client.SetDataType("@pw", SqlDbType.VarChar);
 			client.SetDataType("@comment", SqlDbType.NVarChar);
 			client.SetDataType("@user_icon", SqlDbType.VarChar);
+			client.Execute();
 
+			client.Add("DELETE FROM pre_users");
+			client.Add("WHERE token = @token;");
+			client.AddParam(token);
+			client.SetDataType("@token", SqlDbType.VarChar);
 			client.Execute();
 
 			// 現行のセッションと紐づけ
