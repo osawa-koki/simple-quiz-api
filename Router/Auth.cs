@@ -312,7 +312,7 @@ internal static class Auth
 
 			var user_id = pre_users_data["user_id"].ToString();
 			var mail = pre_users_data["mail"].ToString();
-			var user_name = pre_users_data["user"].ToString();
+			var user_name = pre_users_data["user_name"].ToString();
 			var password = pre_users_data["pw"].ToString();
 			var comment = pre_users_data["comment"].ToString();
 			var user_icon = pre_users_data["user_icon"].ToString();
@@ -325,12 +325,12 @@ internal static class Auth
 			client.AddParam(password);
 			client.AddParam(comment);
 			client.AddParam(user_icon != null ? user_icon : DBNull.Value);
-			client.SetDataType("@", SqlDbType.VarChar);
-			client.SetDataType("@", SqlDbType.VarChar);
-			client.SetDataType("@", SqlDbType.NVarChar);
-			client.SetDataType("@", SqlDbType.VarChar);
-			client.SetDataType("@", SqlDbType.NVarChar);
-			client.SetDataType("@", SqlDbType.VarChar);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
+			client.SetDataType("@mail", SqlDbType.VarChar);
+			client.SetDataType("@user_name", SqlDbType.NVarChar);
+			client.SetDataType("@pw", SqlDbType.VarChar);
+			client.SetDataType("@comment", SqlDbType.NVarChar);
+			client.SetDataType("@user_icon", SqlDbType.VarChar);
 
 			client.Execute();
 
@@ -339,6 +339,8 @@ internal static class Auth
 			client.Add("SET user_id = @user_id");
 			client.Add("WHERE session_id = @session_id;");
 			client.AddParam(user_id);
+			client.AddParam(session_id);
+			client.SetDataType("@user_id", SqlDbType.VarChar);
 			client.SetDataType("@session_id", SqlDbType.VarChar);
 			client.Execute();
 
