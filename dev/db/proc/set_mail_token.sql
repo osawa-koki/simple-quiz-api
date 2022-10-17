@@ -7,7 +7,7 @@ CREATE PROCEDURE set_mail_token
 @user_name NVARCHAR(25),
 @pw VARCHAR(512),
 @comment NVARCHAR(300),
-@user_icon VARCHAR(38),
+@user_icon VARCHAR(38)
 AS
 BEGIN
 
