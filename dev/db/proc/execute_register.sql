@@ -15,19 +15,23 @@ WHERE EXISTS(
 	WHERE DATEADD(HOUR, -1, dbo.GET_TOKYO_DATETIME()) < updt AND token = @token
 );
 
+-- トークンが無効であれば
 IF @is_exist = 0
 BEGIN
-    THROW -1, '指定したトークンは無効です。';
+    THROW 50000, '指定したトークンは無効です。', 1;
 END
 
 -- pre_usersテーブルからusersテーブルへ移行
 INSERT INTO users(user_id, mail, user_name, pw, comment, user_icon)
 SELECT user_id, mail, user_name, pw, comment, user_icon
+FROM pre_users
 WHERE token = @token;
 
 -- pre_usersテーブルのデータは削除
-DELETE FROM users
+DELETE FROM pre_users
 WHERE token = @token;
 
 END
 
+
+	
