@@ -293,18 +293,46 @@ internal static class Auth
 			client.Add("SELECT mail");
 			client.Add("FROM pre_users");
 			client.Add("WHERE token = @token");
-			client.Add("	AND DATEADD(MINUTE, -10, GETDATE()) < updt");
+			client.Add("	AND DATEADD(HOUR, -1, dbo.GET_TOKYO_DATETIME()) < updt");
 			client.AddParam(token);
 			client.SetDataType("@token", SqlDbType.VarChar);
 			var result = client.Select();
 			if (result == null) return Results.BadRequest(new { message = "指定したトークンは無効です。"});
-			string mail = (string)(result["mail"]);
 
 
 			// 本登録処理
-			
+			client.Add("SELECT user_id, mail, user_name, pw, comment, user_icon");
+			client.Add("FROM pre_users");
+			client.Add("WHERE token = @token;");
+			client.AddParam(token);
+			client.SetDataType("token", SqlDbType.VarChar);
+			var pre_users_data = client.Select();
 
-			client.Add("");
+			if (pre_users_data == null) return Results.BadRequest(new {message = "指定したトークンは無効です。"});
+
+			var user_id = pre_users_data["user_id"].ToString();
+			var mail = pre_users_data["mail"].ToString();
+			var user_name = pre_users_data["user"].ToString();
+			var password = pre_users_data["pw"].ToString();
+			var comment = pre_users_data["comment"].ToString();
+			var user_icon = pre_users_data["user_icon"].ToString();
+
+			client.Add("INSERT INTO users(user_id, mail, user_name, pw, comment, user_icon)");
+			client.Add("VALUES(@user_id, @mail, @user_name, @pw, @comment, @user_icon);");
+			client.AddParam(user_id);
+			client.AddParam(mail);
+			client.AddParam(user_name);
+			client.AddParam(password);
+			client.AddParam(comment);
+			client.AddParam(user_icon != null ? user_icon : DBNull.Value);
+			client.SetDataType("@", SqlDbType.VarChar);
+			client.SetDataType("@", SqlDbType.VarChar);
+			client.SetDataType("@", SqlDbType.NVarChar);
+			client.SetDataType("@", SqlDbType.VarChar);
+			client.SetDataType("@", SqlDbType.NVarChar);
+			client.SetDataType("@", SqlDbType.VarChar);
+
+			client.Execute();
 
 			// 現行のセッションと紐づけ
 			client.Add("UPDATE sessions");
