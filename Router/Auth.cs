@@ -11,10 +11,29 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authorization;
 
 
-public record SignUpStruct(string token, string user_id, string password, string user_name, string comment);
-public record SignInStruct(string uid, string password);
+#pragma warning disable
 
-public record PreSignUpStruct(string mail);
+public record SignUpStruct(
+	string token
+);
+
+public record SignInStruct(
+	string uid,
+	string password
+);
+
+
+public record PreSignUpStruct(
+	string mail,
+	string user_id,
+	string password,
+	string user_name,
+	string comment,
+	string user_icon
+);
+
+
+#pragma warning restore
 
 internal static class Auth
 {
@@ -154,7 +173,28 @@ internal static class Auth
 	[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 	internal static IResult PreSignUp(PreSignUpStruct preSignUpStruct)
 	{
+		var user_id = preSignUpStruct.user_id;
 		var mail = preSignUpStruct.mail;
+		var user_name = preSignUpStruct.user_name;
+		var comment = preSignUpStruct.comment;
+		var password = preSignUpStruct.password;
+		var user_icon = preSignUpStruct.user_icon;
+
+		// ユーザIDのチェック
+		if (user_id.Length < 3 || 16 < user_id.Length)
+		{
+			return Results.BadRequest(new { message = "ユーザIDの長さが不正です。"});
+		}
+		// パスワードのチェック
+		if (!Regex.IsMatch(password, @"^[a-zA-Z0-9-/:-@\[-\`\{-\~]+$"))
+		{
+			return Results.BadRequest(new { message = "パスワードは空白類似文字を除いた半角英数字のみで構成してください。"});
+		}
+		if (password.Length < 8 || 32 < password.Length)
+		{
+			return Results.BadRequest(new { message = "パスワードの文字数が不正です。"});
+		}
+
 		try
 		{
 			// メールアドレスのチェック
@@ -189,7 +229,7 @@ internal static class Auth
 
 			// トークンをセット
 			string token = Guid.NewGuid().ToString("N");
-			client.Add($"EXEC set_mail_token @mail = '{mail.Replace("'", "''")}', @token = '{token.Replace("'", "''")}';"); // SQLインジェクション攻撃対策
+			client.Add($"EXEC set_mail_token @mail = '{mail.Replace("'", "''")}', @token = '{token.Replace("'", "''")}', @user_id = '{user_id.Replace("'", "''")}', @user_name = '{user_name.Replace("'", "''")}', @pw = '{Util.Hasher_sha256($"@{password}@")}', @comment = '{comment.Replace("'", "''")}', @user_icon = '{user_icon.Replace("'", "''")}';"); // SQLインジェクション攻撃対策
 			client.Execute();
 
 			MailSetting mailSetting = new()
@@ -197,7 +237,7 @@ internal static class Auth
 				MailTo = mail,
 				MailFrom = Env.SMTPSERVER_USER,
 				Subject = "【simple-quiz】仮会員登録",
-				Body = $"以下のリンクから会員登録を完成させてください。\r\nリンクの有効期限は10分です。\r\n\r\n{Env.DOMAIN}/register?token={token}",
+				Body = $"以下のリンクから会員登録を完成させてください。\r\nリンクの有効期限は10分です。\r\n\r\nhttps://{Env.DOMAIN}/register?token={token}",
 			};
 			if (MailClient.Send(mailSetting))
 			{
@@ -243,26 +283,8 @@ internal static class Auth
 	internal static IResult SignUp(SignUpStruct signUpStruct, [FromHeader(Name = "Authorization")] string session_id)
 	{
 		string token = signUpStruct.token;
-		string user_id = signUpStruct.user_id;
-		string password = signUpStruct.password;
-		string user_name = signUpStruct.user_name;
-		string comment = signUpStruct.comment;
 		try
 		{
-			// ユーザ名のチェック
-			if (user_id.Length < 3 || 16 < user_id.Length)
-			{
-				return Results.BadRequest(new { message = "ユーザIDの長さが不正です。"});
-			}
-			// パスワードのチェック
-			if (!Regex.IsMatch(password, @"^[a-zA-Z0-9-/:-@\[-\`\{-\~]+$"))
-			{
-				return Results.BadRequest(new { message = "パスワードは空白類似文字を除いた半角英数字のみで構成してください。"});
-			}
-			if (password.Length < 8 || 32 < password.Length)
-			{
-				return Results.BadRequest(new { message = "パスワードの文字数が不正です。"});
-			}
 
 			DBClient client = new();
 
@@ -280,29 +302,9 @@ internal static class Auth
 
 
 			// 本登録処理
-			string? hashed_password = Util.Hasher_sha256($"@{password}@");
-			if (hashed_password == null) return Results.Problem("ハッシュ生成に失敗しました。");
-
-			client.Add("INSERT INTO users(user_id, mail, pw, user_name, comment)");
-			client.Add("VALUES(@user_id, @mail, @pw, @user_name, @comment)");
-			client.AddParam(user_id);
-			client.AddParam(mail);
-			client.AddParam(hashed_password);
-			client.AddParam(user_name);
-			client.AddParam(comment);
-			client.SetDataType("@user_id", SqlDbType.VarChar);
-			client.SetDataType("@mail", SqlDbType.VarChar);
-			client.SetDataType("@pw", SqlDbType.VarChar);
-			client.SetDataType("@user_name", SqlDbType.VarChar);
-			client.SetDataType("@comment", SqlDbType.VarChar);
-			client.Execute();
 			
-			// 仮会員登録テーブルから削除
-			client.Add("DELETE FROM pre_users");
-			client.Add("WHERE token = @token");
-			client.AddParam(token);
-			client.SetDataType("@token", SqlDbType.VarChar);
-			client.Execute();
+
+			client.Add("");
 
 			// 現行のセッションと紐づけ
 			client.Add("UPDATE sessions");
