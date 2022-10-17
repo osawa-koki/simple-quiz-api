@@ -543,6 +543,10 @@ internal static class Auth
 
 			client.Add("SELECT user_id");
 			client.Add("FROM users");
+			client.Add("WHERE user_id = @user_id");
+			client.Add("UNION");
+			client.Add("SELECT user_id");
+			client.Add("FROM pre_users");
 			client.Add("WHERE user_id = @user_id;");
 			client.AddParam(user_id);
 			client.SetDataType("@user_id", SqlDbType.VarChar);
