@@ -176,9 +176,14 @@ internal static class Auth
 		var user_id = preSignUpStruct.user_id;
 		var mail = preSignUpStruct.mail;
 		var user_name = preSignUpStruct.user_name;
-		var comment = preSignUpStruct.comment;
+		var comment = preSignUpStruct.comment ?? "";
 		var password = preSignUpStruct.password;
 		var user_icon = preSignUpStruct.user_icon;
+
+		if (user_id == null) return Results.BadRequest(new {message = "ユーザIDを指定してください。"});
+		if (mail == null) return Results.BadRequest(new {message = "メールアドレスを指定してください。"});
+		if (user_name == null) return Results.BadRequest(new {message = "ユーザ名を指定してください。"});
+		if (password == null) return Results.BadRequest(new {message = "パスワードを指定してください。"});
 
 		// ユーザIDのチェック
 		if (user_id.Length < 3 || 16 < user_id.Length)
@@ -249,7 +254,7 @@ internal static class Auth
 
 			// トークンをセット
 			string token = Guid.NewGuid().ToString("N");
-			client.Add($"EXEC set_mail_token @mail = '{mail.Replace("'", "''")}', @token = '{token.Replace("'", "''")}', @user_id = '{user_id.Replace("'", "''")}', @user_name = '{user_name.Replace("'", "''")}', @pw = '{Util.Hasher_sha256($"@{password}@")}', @comment = '{comment.Replace("'", "''")}', @user_icon = '{user_icon.Replace("'", "''")}';"); // SQLインジェクション攻撃対策
+			client.Add($"EXEC set_mail_token @mail = '{mail.Replace("'", "''")}', @token = '{token.Replace("'", "''")}', @user_id = '{user_id.Replace("'", "''")}', @user_name = '{user_name.Replace("'", "''")}', @pw = '{Util.Hasher_sha256($"@{password}@")}', @comment = {(comment != null ? $"'{comment.Replace("'", "''")}'" : "null")}, @user_icon = {(user_icon != null ? $"'{user_icon.Replace("'", "''")}'" : "null")};"); // SQLインジェクション攻撃対策
 			client.Execute();
 
 			MailSetting mailSetting = new()
