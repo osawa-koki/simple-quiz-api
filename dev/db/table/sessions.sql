@@ -1,0 +1,14 @@
+-- セッション管理
+
+CREATE TABLE sessions(
+	session_id VARCHAR(32) PRIMARY KEY,
+	user_id VARCHAR(16) NULL,
+	user_name NVARCHAR(25) NULL,
+	comment NVARCHAR(300) NULL,
+	user_icon VARCHAR(32) NULL,
+	rgdt DATETIME DEFAULT dbo.GET_TOKYO_DATETIME(),
+	updt DATETIME DEFAULT dbo.GET_TOKYO_DATETIME(),
+	CONSTRAINT fgk_user_session FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+
